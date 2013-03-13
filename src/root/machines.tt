@@ -12,7 +12,7 @@
         </tr>
     </thead>
     <tbody>
-        [% FOREACH m IN machines %]
+        [% FOREACH m IN resource %]
         <tr>
             <td><input type="checkbox" name="enabled" [% IF m.value.maxJobs > 0  %]CHECKED[% END %] disabled="true" /></td>
             <td>[% m.key %]</a></td>
