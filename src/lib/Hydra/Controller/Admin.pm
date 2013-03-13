@@ -2,7 +2,7 @@ package Hydra::Controller::Admin;
 
 use strict;
 use warnings;
-use base 'Catalyst::Controller';
+use base 'Hydra::Base::Controller::REST';
 use Hydra::Helper::Nix;
 use Hydra::Helper::CatalystUtils;
 use Hydra::Helper::AddBuilds;
@@ -18,10 +18,20 @@ sub admin : Chained('/') PathPart('admin') CaptureArgs(0) {
 }
 
 
-sub users : Chained('admin') PathPart('users') Args(0) {
+sub users : Chained('admin') PathPart('users') Args(0) : ActionClass('REST') { }
+
+sub users_GET {
     my ($self, $c) = @_;
-    $c->stash->{users} = [$c->model('DB::Users')->search({}, {order_by => "username"})];
     $c->stash->{template} = 'users.tt';
+    $self->status_ok(
+        $c,
+        entity => [$c->model('DB::Users')->search({},{
+            order_by => "me.username",
+            columns => [ 'fullname', 'emailonerror', 'username', 'emailaddress' ],
+            prefetch => 'userroles',
+            result_class => 'DBIx::Class::ResultClass::HashRefInflator',
+        })]
+    );
 }
 
 

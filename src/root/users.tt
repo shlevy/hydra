@@ -12,7 +12,7 @@
     </tr>
   </thead>
   <tbody>
-    [% FOREACH u IN users %]
+    [% FOREACH u IN resource %]
       <tr>
         <td><a class="row-link" href="[% c.uri_for(c.controller('User').action_for('edit'), [u.username]) %]">[% u.username %]</a></td>
         <td>[% u.fullname %]</td>

@@ -2,7 +2,8 @@
 
 with pkgs;
 
-[ perlPackages.CatalystAuthenticationStoreDBIxClass
+[ perlPackages.CatalystActionREST
+  perlPackages.CatalystAuthenticationStoreDBIxClass
   perlPackages.CatalystPluginAccessLog
   perlPackages.CatalystPluginAuthorizationRoles
   perlPackages.CatalystPluginCaptcha
