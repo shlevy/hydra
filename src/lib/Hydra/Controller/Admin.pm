@@ -47,19 +47,18 @@ sub machines_GET {
 }
 
 
-sub failedcache : Chained('admin') Path('failed-cache') Args(0) : ActionClass('REST') { }
+sub failedcache : Chained('admin') PathPart('failed-cache') Args(0) : ActionClass('REST') { }
 
 sub failedcache_DELETE {
     my ($self, $c) = @_;
     my $r = `nix-store --clear-failed-paths '*'`;
-    $self->status_ok(
-        $c,
-        entity => {}
+    $self->status_no_content(
+        $c
     );
 }
 
 
-sub vcscache : Chained('admin') Path('vcs-cache') Args(0) : ActionClass('REST') { }
+sub vcscache : Chained('admin') PathPart('vcs-cache') Args(0) : ActionClass('REST') { }
 
 sub vscache_DELETE {
     my ($self, $c) = @_;
@@ -76,50 +75,87 @@ sub vscache_DELETE {
     print "Clearing bazaar cache\n";
     $c->model('DB::CachedBazaarInputs')->delete_all;
 
-    $self->status_ok(
-        $c,
-        entity => {}
+    $self->status_no_content(
+        $c
     );
 }
 
 
-sub managenews : Chained('admin') Path('news') Args(0) {
+sub news : Chained('admin') PathPart('news') Args(0) : ActionClass('REST::ForBrowsers') { }
+
+sub news_GET {
     my ($self, $c) = @_;
 
-    $c->stash->{newsItems} = [$c->model('DB::NewsItems')->search({}, {order_by => 'createtime DESC'})];
-
     $c->stash->{template} = 'news.tt';
+    $self->status_ok(
+        $c,
+        entity => [$c->model('DB::NewsItems')->search({}, {order_by => 'createtime DESC'})]
+    );
 }
 
 
-sub news_submit : Chained('admin') Path('news/submit') Args(0) {
+sub news_POST {
     my ($self, $c) = @_;
-
-    requirePost($c);
 
     my $contents = trim $c->request->params->{"contents"};
     my $createtime = time;
 
-    $c->model('DB::NewsItems')->create({
+    my %newsItem = $c->model('DB::NewsItems')->create({
         createtime => $createtime,
         contents => $contents,
         author => $c->user->username
-    });
+    })->get_columns;
 
-    $c->res->redirect("/admin/news");
+    if ($c->req->looks_like_browser) {
+        $c->res->redirect("/admin/news");
+    } else {
+        $self->status_created(
+            $c,
+            location => $c->req->uri . "/" . $newsItem{id},
+            entity => \%newsItem
+        );
+    }
+}
+
+sub news_item : Chained('admin') PathPart('news') Args(1) : ActionClass('REST::ForBrowsers') { }
+
+sub news_item_GET : {
+    my ($self, $c, $id) = @_;
+    my $newsItem = $c->model('DB::NewsItems')->find($id,
+        { result_class =>'DBIx::Class::ResultClass::HashRefInflator' }
+    );
+    if (defined $newsItem) {
+        $self->status_ok (
+            $c,
+            entity => $newsItem
+        );
+    } else {
+        $self->status_not_found(
+            $c,
+            message => "News item with id $id doesn't exist."
+        );
+    }
 }
 
 
-sub news_delete : Chained('admin') Path('news/delete') Args(1) {
+sub news_item_DELETE : {
     my ($self, $c, $id) = @_;
 
     txn_do($c->model('DB')->schema, sub {
-        my $newsItem = $c->model('DB::NewsItems')->find($id)
-          or notFound($c, "Newsitem with id $id doesn't exist.");
-        $newsItem->delete;
+        my $newsItem = $c->model('DB::NewsItems')->find($id);
+        if (defined $newsItem) {
+            $newsItem->delete;
+            if ($c->req->looks_like_browser) {
+		 $c->res->redirect("/admin/news");
+            } else {
+                $self->status_no_content(
+                    $c
+                );
+            }
+        } else {
+          self->status_not_found($c, message => "News item with id $id doesn't exist.");
+        }
     });
-
-    $c->res->redirect("/admin/news");
 }
 
 

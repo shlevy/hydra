@@ -3,25 +3,25 @@
 
 [% USE String %]
 
-[% IF newsItems.size == 0 %]
+[% IF resource.size == 0 %]
     <p>No news items</p>
 [% ELSE %]
     <table class="table table-striped table-condensed">
         <thead><th>Date</th><th>Contents</th><th></th></thead>
         <tbody>
-        [% FOREACH i IN newsItems %]
+        [% FOREACH i IN resource %]
             [% contents = String.new(i.contents) %]
             <tr>
                 <td>[% INCLUDE renderDateTime timestamp=i.createtime %]</td>
                 <td>[% contents.replace('\n','<br />\n') %]</td>
-                <td>[% INCLUDE maybeLink uri = c.uri_for(c.controller('Admin').action_for('news_delete') i.id) content = "Delete" confirmmsg = "Are you sure you want to delete this news item?" class = "btn btn-mini btn-danger" %]</td>
+                <td><form action="[% c.uri_for(c.controller('Admin').action_for('news') i.id) %]" method="post"><input type="hidden" name="x-tunneled-method" value="DELETE" /><button type="submit" class="btn btn-mini btn-danger" onclick="return confirm('Are you sure you want to delete this news item?')">Delete</button></form></td>
             </tr>
         [% END %]
         </tbody>
     </table>
 [% END %]
 
-<form class="form-horizontal" action="[% c.uri_for('/admin/news/submit') %]" method="post">
+<form class="form-horizontal" action="[% c.uri_for('/admin/news') %]" method="post">
   <fieldset>
     <legend>Add news item</legend>
     <div class="control-group">

@@ -60,9 +60,8 @@ sub queue_DELETE {
     my ($self, $c) = @_;
     requireAdmin($c);
     $c->model('DB::Builds')->search({finished => 0, iscurrent => 0, busy => 0})->update({ finished => 1, buildstatus => 4, timestamp => time});
-    $self->status_ok(
-        $c,
-        entity => {}
+    $self->status_no_content(
+        $c
     );
 }
 
