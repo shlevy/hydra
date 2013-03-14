@@ -47,10 +47,15 @@ sub machines_GET {
 }
 
 
-sub clearfailedcache : Chained('admin') Path('clear-failed-cache') Args(0) {
+sub failedcache : Chained('admin') Path('failed-cache') Args(0) : ActionClass('REST') { }
+
+sub failedcache_DELETE {
     my ($self, $c) = @_;
     my $r = `nix-store --clear-failed-paths '*'`;
-    $c->res->redirect($c->request->referer // "/admin");
+    $self->status_ok(
+        $c,
+        entity => {}
+    );
 }
 
 
