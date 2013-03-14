@@ -42,15 +42,8 @@ sub machines_GET {
     $c->stash->{template} = 'machines.tt';
     $self->status_ok(
         $c,
-        entity => getMachines;
+        entity => getMachines
     );
-}
-
-
-sub clear_queue_non_current : Chained('admin') Path('clear-queue-non-current') Args(0) {
-    my ($self, $c) = @_;
-    $c->model('DB::Builds')->search({finished => 0, iscurrent => 0, busy => 0})->update({ finished => 1, buildstatus => 4, timestamp => time});
-    $c->res->redirect($c->request->referer // "/admin");
 }
 
 

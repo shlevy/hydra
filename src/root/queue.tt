@@ -1,13 +1,13 @@
 [% WRAPPER layout.tt title="Queue" %]
 [% PROCESS common.tt %]
 
-[% IF queue.size == 0 %]
+[% IF resource.size == 0 %]
 
   <p>The queue is empty.</p>
 
 [% ELSE %]
 
-  [% INCLUDE renderBuildList builds=queue showSchedulingInfo=1 hideResultInfo=1 %]
+  [% INCLUDE renderBuildList builds=resource showSchedulingInfo=1 hideResultInfo=1 %]
 
 [% END %]
 

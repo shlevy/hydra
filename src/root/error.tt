@@ -1,7 +1,7 @@
 [% WRAPPER layout.tt title=(httpStatus ? httpStatus : "Error") %]
 [% USE HTML %]
 
-[% FOREACH error IN errors %]
+[% FOREACH error IN resource.errors %]
    <div class="alert alert-error">[% HTML.escape(error) %]</div>
 [% END %]
 

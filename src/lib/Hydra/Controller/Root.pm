@@ -28,7 +28,10 @@ sub begin :Private {
         $c->stash->{nrRunningBuilds} = $c->model('DB::Builds')->search({ finished => 0, busy => 1 }, {})->count();
         $c->stash->{nrQueuedBuilds} = $c->model('DB::Builds')->search({ finished => 0 })->count();
     }
+    $c->forward('deserialize');
 }
+
+sub deserialize : ActionClass('Deserialize') {}
 
 
 sub index :Path :Args(0) {
@@ -39,12 +42,28 @@ sub index :Path :Args(0) {
 }
 
 
-sub queue :Local {
+sub queue :Local : ActionClass('REST') { }
+
+sub queue_GET {
     my ($self, $c) = @_;
     $c->stash->{template} = 'queue.tt';
-    $c->stash->{queue} = [$c->model('DB::Builds')->search(
-        {finished => 0}, { join => ['project'], order_by => ["priority DESC", "timestamp"], columns => [@buildListColumns], '+select' => ['project.enabled'], '+as' => ['enabled'] })];
     $c->stash->{flashMsg} //= $c->flash->{buildMsg};
+    $self->status_ok(
+        $c,
+        entity => [$c->model('DB::Builds')->search(
+            {finished => 0}, { join => ['project'], order_by => ["priority DESC", "timestamp"], columns => [@buildListColumns], '+select' => ['project.enabled'], '+as' => ['enabled'], result_class => 'DBIx::Class::ResultClass::HashRefInflator' })]
+    );
+}
+
+
+sub queue_DELETE {
+    my ($self, $c) = @_;
+    requireAdmin($c);
+    $c->model('DB::Builds')->search({finished => 0, iscurrent => 0, busy => 0})->update({ finished => 1, buildstatus => 4, timestamp => time});
+    $self->status_ok(
+        $c,
+        entity => {}
+    );
 }
 
 
@@ -158,25 +177,22 @@ sub default :Path {
 sub end : ActionClass('RenderView') {
     my ($self, $c) = @_;
 
-    if (defined $c->stash->{json}) {
-        if (scalar @{$c->error}) {
-            $c->stash->{json}->{error} = join "\n", @{$c->error};
-            $c->clear_errors;
-        }
-        $c->forward('View::JSON');
-    }
-
-    elsif (scalar @{$c->error}) {
+    if (scalar @{$c->error}) {
+        $c->stash->{resource} = { errors => $c->error };
         $c->stash->{template} = 'error.tt';
-        $c->stash->{errors} = $c->error;
+        $c->clear_errors;
         $c->response->status(500) if $c->response->status == 200;
         if ($c->response->status >= 300) {
             $c->stash->{httpStatus} =
                 $c->response->status . " " . HTTP::Status::status_message($c->response->status);
         }
-        $c->clear_errors;
+
     }
+
+    $c->forward('serialize');
 }
+
+sub serialize : ActionClass('Serialize') {}
 
 
 sub nar :Local :Args(1) {
