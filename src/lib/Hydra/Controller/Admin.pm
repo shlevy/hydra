@@ -59,7 +59,9 @@ sub failedcache_DELETE {
 }
 
 
-sub clearvcscache : Chained('admin') Path('clear-vcs-cache') Args(0) {
+sub vcscache : Chained('admin') Path('vcs-cache') Args(0) : ActionClass('REST') { }
+
+sub vscache_DELETE {
     my ($self, $c) = @_;
 
     print "Clearing path cache\n";
@@ -74,7 +76,10 @@ sub clearvcscache : Chained('admin') Path('clear-vcs-cache') Args(0) {
     print "Clearing bazaar cache\n";
     $c->model('DB::CachedBazaarInputs')->delete_all;
 
-    $c->res->redirect($c->request->referer // "/admin");
+    $self->status_ok(
+        $c,
+        entity => {}
+    );
 }
 
 
