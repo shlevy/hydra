@@ -15,6 +15,18 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+=head1 COMPONENTS LOADED
+
+=over 4
+
+=item * L<DBIx::Class::Helper::Row::ToJSON>
+
+=back
+
+=cut
+
+__PACKAGE__->load_components("Helper::Row::ToJSON");
+
 =head1 TABLE: C<Builds>
 
 =cut
@@ -44,58 +56,69 @@ __PACKAGE__->table("Builds");
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
+  is_serializable: 1
 
 =head2 jobset
 
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
+  is_serializable: 1
 
 =head2 job
 
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
+  is_serializable: 1
 
 =head2 nixname
 
   data_type: 'text'
   is_nullable: 1
+  is_serializable: 1
 
 =head2 description
 
   data_type: 'text'
   is_nullable: 1
+  is_serializable: 1
 
 =head2 drvpath
 
   data_type: 'text'
   is_nullable: 0
+  is_serializable: 1
 
 =head2 system
 
   data_type: 'text'
   is_nullable: 0
+  is_serializable: 1
 
 =head2 longdescription
 
   data_type: 'text'
   is_nullable: 1
+  is_serializable: 1
 
 =head2 license
 
   data_type: 'text'
   is_nullable: 1
+  is_serializable: 1
 
 =head2 homepage
 
   data_type: 'text'
   is_nullable: 1
+  is_serializable: 1
 
 =head2 maintainers
 
   data_type: 'text'
   is_nullable: 1
+  is_serializable: 1
 
 =head2 maxsilent
 
@@ -119,11 +142,13 @@ __PACKAGE__->table("Builds");
 
   data_type: 'text'
   is_nullable: 1
+  is_serializable: 1
 
 =head2 nixexprpath
 
   data_type: 'text'
   is_nullable: 1
+  is_serializable: 1
 
 =head2 priority
 
@@ -141,11 +166,13 @@ __PACKAGE__->table("Builds");
 
   data_type: 'text'
   is_nullable: 1
+  is_serializable: 1
 
 =head2 logfile
 
   data_type: 'text'
   is_nullable: 1
+  is_serializable: 1
 
 =head2 disabled
 
@@ -177,6 +204,7 @@ __PACKAGE__->table("Builds");
 
   data_type: 'text'
   is_nullable: 1
+  is_serializable: 1
 
 =head2 size
 
@@ -192,6 +220,7 @@ __PACKAGE__->table("Builds");
 
   data_type: 'text'
   is_nullable: 1
+  is_serializable: 1
 
 =head2 keep
 
@@ -209,27 +238,42 @@ __PACKAGE__->add_columns(
   "timestamp",
   { data_type => "integer", is_nullable => 0 },
   "project",
-  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
+  {
+    data_type       => "text",
+    is_foreign_key  => 1,
+    is_nullable     => 0,
+    is_serializable => 1,
+  },
   "jobset",
-  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
+  {
+    data_type       => "text",
+    is_foreign_key  => 1,
+    is_nullable     => 0,
+    is_serializable => 1,
+  },
   "job",
-  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
+  {
+    data_type       => "text",
+    is_foreign_key  => 1,
+    is_nullable     => 0,
+    is_serializable => 1,
+  },
   "nixname",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1, is_serializable => 1 },
   "description",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1, is_serializable => 1 },
   "drvpath",
-  { data_type => "text", is_nullable => 0 },
+  { data_type => "text", is_nullable => 0, is_serializable => 1 },
   "system",
-  { data_type => "text", is_nullable => 0 },
+  { data_type => "text", is_nullable => 0, is_serializable => 1 },
   "longdescription",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1, is_serializable => 1 },
   "license",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1, is_serializable => 1 },
   "homepage",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1, is_serializable => 1 },
   "maintainers",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1, is_serializable => 1 },
   "maxsilent",
   { data_type => "integer", default_value => 3600, is_nullable => 1 },
   "timeout",
@@ -237,17 +281,17 @@ __PACKAGE__->add_columns(
   "iscurrent",
   { data_type => "integer", default_value => 0, is_nullable => 1 },
   "nixexprinput",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1, is_serializable => 1 },
   "nixexprpath",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1, is_serializable => 1 },
   "priority",
   { data_type => "integer", default_value => 0, is_nullable => 0 },
   "busy",
   { data_type => "integer", default_value => 0, is_nullable => 0 },
   "locker",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1, is_serializable => 1 },
   "logfile",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1, is_serializable => 1 },
   "disabled",
   { data_type => "integer", default_value => 0, is_nullable => 0 },
   "starttime",
@@ -259,13 +303,13 @@ __PACKAGE__->add_columns(
   "buildstatus",
   { data_type => "integer", is_nullable => 1 },
   "errormsg",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1, is_serializable => 1 },
   "size",
   { data_type => "bigint", is_nullable => 1 },
   "closuresize",
   { data_type => "bigint", is_nullable => 1 },
   "releasename",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1, is_serializable => 1 },
   "keep",
   { data_type => "integer", default_value => 0, is_nullable => 0 },
 );
@@ -465,8 +509,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-01-30 16:22:11
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:YBdqPWScG4dtGx+U3dJcwA
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-27 16:37:57
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:aSencv9VT/EW71ekH4/9wQ
 
 __PACKAGE__->has_many(
   "dependents",

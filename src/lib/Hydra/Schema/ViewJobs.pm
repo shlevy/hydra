@@ -15,6 +15,18 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+=head1 COMPONENTS LOADED
+
+=over 4
+
+=item * L<DBIx::Class::Helper::Row::ToJSON>
+
+=back
+
+=cut
+
+__PACKAGE__->load_components("Helper::Row::ToJSON");
+
 =head1 TABLE: C<ViewJobs>
 
 =cut
@@ -28,22 +40,26 @@ __PACKAGE__->table("ViewJobs");
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
+  is_serializable: 1
 
 =head2 view_
 
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
+  is_serializable: 1
 
 =head2 job
 
   data_type: 'text'
   is_nullable: 0
+  is_serializable: 1
 
 =head2 attrs
 
   data_type: 'text'
   is_nullable: 0
+  is_serializable: 1
 
 =head2 isprimary
 
@@ -55,11 +71,13 @@ __PACKAGE__->table("ViewJobs");
 
   data_type: 'text'
   is_nullable: 1
+  is_serializable: 1
 
 =head2 jobset
 
   data_type: 'text'
   is_nullable: 0
+  is_serializable: 1
 
 =head2 autorelease
 
@@ -71,19 +89,29 @@ __PACKAGE__->table("ViewJobs");
 
 __PACKAGE__->add_columns(
   "project",
-  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
+  {
+    data_type       => "text",
+    is_foreign_key  => 1,
+    is_nullable     => 0,
+    is_serializable => 1,
+  },
   "view_",
-  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
+  {
+    data_type       => "text",
+    is_foreign_key  => 1,
+    is_nullable     => 0,
+    is_serializable => 1,
+  },
   "job",
-  { data_type => "text", is_nullable => 0 },
+  { data_type => "text", is_nullable => 0, is_serializable => 1 },
   "attrs",
-  { data_type => "text", is_nullable => 0 },
+  { data_type => "text", is_nullable => 0, is_serializable => 1 },
   "isprimary",
   { data_type => "integer", default_value => 0, is_nullable => 0 },
   "description",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1, is_serializable => 1 },
   "jobset",
-  { data_type => "text", is_nullable => 0 },
+  { data_type => "text", is_nullable => 0, is_serializable => 1 },
   "autorelease",
   { data_type => "integer", default_value => 0, is_nullable => 0 },
 );
@@ -139,7 +167,7 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-01-22 13:29:36
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:cbSUw113ENPypbd/sICfgg
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-27 16:37:57
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:J60EcqOKIV7Spiz1SgIByQ
 
 1;

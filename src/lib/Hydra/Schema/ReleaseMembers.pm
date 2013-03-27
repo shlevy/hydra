@@ -15,6 +15,18 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+=head1 COMPONENTS LOADED
+
+=over 4
+
+=item * L<DBIx::Class::Helper::Row::ToJSON>
+
+=back
+
+=cut
+
+__PACKAGE__->load_components("Helper::Row::ToJSON");
+
 =head1 TABLE: C<ReleaseMembers>
 
 =cut
@@ -28,12 +40,14 @@ __PACKAGE__->table("ReleaseMembers");
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
+  is_serializable: 1
 
 =head2 release_
 
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
+  is_serializable: 1
 
 =head2 build
 
@@ -45,18 +59,29 @@ __PACKAGE__->table("ReleaseMembers");
 
   data_type: 'text'
   is_nullable: 1
+  is_serializable: 1
 
 =cut
 
 __PACKAGE__->add_columns(
   "project",
-  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
+  {
+    data_type       => "text",
+    is_foreign_key  => 1,
+    is_nullable     => 0,
+    is_serializable => 1,
+  },
   "release_",
-  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
+  {
+    data_type       => "text",
+    is_foreign_key  => 1,
+    is_nullable     => 0,
+    is_serializable => 1,
+  },
   "build",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "description",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1, is_serializable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -123,7 +148,7 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-01-22 13:29:36
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:eP00w5UJp1uTtiB7D5IhTQ
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-27 16:37:57
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:jcB0qK55nwyPQLOPVM/Ctw
 
 1;

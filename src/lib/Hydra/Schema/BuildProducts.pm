@@ -15,6 +15,18 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+=head1 COMPONENTS LOADED
+
+=over 4
+
+=item * L<DBIx::Class::Helper::Row::ToJSON>
+
+=back
+
+=cut
+
+__PACKAGE__->load_components("Helper::Row::ToJSON");
+
 =head1 TABLE: C<BuildProducts>
 
 =cut
@@ -38,11 +50,13 @@ __PACKAGE__->table("BuildProducts");
 
   data_type: 'text'
   is_nullable: 0
+  is_serializable: 1
 
 =head2 subtype
 
   data_type: 'text'
   is_nullable: 0
+  is_serializable: 1
 
 =head2 filesize
 
@@ -53,31 +67,37 @@ __PACKAGE__->table("BuildProducts");
 
   data_type: 'text'
   is_nullable: 1
+  is_serializable: 1
 
 =head2 sha256hash
 
   data_type: 'text'
   is_nullable: 1
+  is_serializable: 1
 
 =head2 path
 
   data_type: 'text'
   is_nullable: 1
+  is_serializable: 1
 
 =head2 name
 
   data_type: 'text'
   is_nullable: 0
+  is_serializable: 1
 
 =head2 description
 
   data_type: 'text'
   is_nullable: 1
+  is_serializable: 1
 
 =head2 defaultpath
 
   data_type: 'text'
   is_nullable: 1
+  is_serializable: 1
 
 =cut
 
@@ -87,23 +107,23 @@ __PACKAGE__->add_columns(
   "productnr",
   { data_type => "integer", is_nullable => 0 },
   "type",
-  { data_type => "text", is_nullable => 0 },
+  { data_type => "text", is_nullable => 0, is_serializable => 1 },
   "subtype",
-  { data_type => "text", is_nullable => 0 },
+  { data_type => "text", is_nullable => 0, is_serializable => 1 },
   "filesize",
   { data_type => "bigint", is_nullable => 1 },
   "sha1hash",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1, is_serializable => 1 },
   "sha256hash",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1, is_serializable => 1 },
   "path",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1, is_serializable => 1 },
   "name",
-  { data_type => "text", is_nullable => 0 },
+  { data_type => "text", is_nullable => 0, is_serializable => 1 },
   "description",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1, is_serializable => 1 },
   "defaultpath",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1, is_serializable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -138,8 +158,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-01-22 13:29:36
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:KHwh/Np40jxKXc3ijMImEQ
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-27 16:37:57
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:9ZvlbCxzoxs3BS8L1ss3Xg
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

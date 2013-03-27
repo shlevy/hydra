@@ -15,6 +15,18 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+=head1 COMPONENTS LOADED
+
+=over 4
+
+=item * L<DBIx::Class::Helper::Row::ToJSON>
+
+=back
+
+=cut
+
+__PACKAGE__->load_components("Helper::Row::ToJSON");
+
 =head1 TABLE: C<JobsetEvals>
 
 =cut
@@ -34,12 +46,14 @@ __PACKAGE__->table("JobsetEvals");
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
+  is_serializable: 1
 
 =head2 jobset
 
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
+  is_serializable: 1
 
 =head2 timestamp
 
@@ -65,6 +79,7 @@ __PACKAGE__->table("JobsetEvals");
 
   data_type: 'text'
   is_nullable: 0
+  is_serializable: 1
 
 =head2 nrbuilds
 
@@ -82,9 +97,19 @@ __PACKAGE__->add_columns(
   "id",
   { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
   "project",
-  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
+  {
+    data_type       => "text",
+    is_foreign_key  => 1,
+    is_nullable     => 0,
+    is_serializable => 1,
+  },
   "jobset",
-  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
+  {
+    data_type       => "text",
+    is_foreign_key  => 1,
+    is_nullable     => 0,
+    is_serializable => 1,
+  },
   "timestamp",
   { data_type => "integer", is_nullable => 0 },
   "checkouttime",
@@ -94,7 +119,7 @@ __PACKAGE__->add_columns(
   "hasnewbuilds",
   { data_type => "integer", is_nullable => 0 },
   "hash",
-  { data_type => "text", is_nullable => 0 },
+  { data_type => "text", is_nullable => 0, is_serializable => 1 },
   "nrbuilds",
   { data_type => "integer", is_nullable => 1 },
   "nrsucceeded",
@@ -176,8 +201,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-01-22 13:29:36
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:qElGj6zzuI0xo426np3r1w
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-27 16:37:57
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:7oSb3l8obbCrslPvUxM4aA
 
 __PACKAGE__->has_many(
   "buildIds",

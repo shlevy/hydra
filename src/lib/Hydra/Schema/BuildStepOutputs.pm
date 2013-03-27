@@ -15,6 +15,18 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+=head1 COMPONENTS LOADED
+
+=over 4
+
+=item * L<DBIx::Class::Helper::Row::ToJSON>
+
+=back
+
+=cut
+
+__PACKAGE__->load_components("Helper::Row::ToJSON");
+
 =head1 TABLE: C<BuildStepOutputs>
 
 =cut
@@ -39,11 +51,13 @@ __PACKAGE__->table("BuildStepOutputs");
 
   data_type: 'text'
   is_nullable: 0
+  is_serializable: 1
 
 =head2 path
 
   data_type: 'text'
   is_nullable: 0
+  is_serializable: 1
 
 =cut
 
@@ -53,9 +67,9 @@ __PACKAGE__->add_columns(
   "stepnr",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "name",
-  { data_type => "text", is_nullable => 0 },
+  { data_type => "text", is_nullable => 0, is_serializable => 1 },
   "path",
-  { data_type => "text", is_nullable => 0 },
+  { data_type => "text", is_nullable => 0, is_serializable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -107,8 +121,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-01-30 16:22:11
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:dC1yX7arRVu9K3wG9dAjCg
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-27 16:37:57
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:sbP/iKbaXuC9rHf+1Y0eMQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

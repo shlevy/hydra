@@ -15,6 +15,18 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+=head1 COMPONENTS LOADED
+
+=over 4
+
+=item * L<DBIx::Class::Helper::Row::ToJSON>
+
+=back
+
+=cut
+
+__PACKAGE__->load_components("Helper::Row::ToJSON");
+
 =head1 TABLE: C<Views>
 
 =cut
@@ -28,16 +40,19 @@ __PACKAGE__->table("Views");
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
+  is_serializable: 1
 
 =head2 name
 
   data_type: 'text'
   is_nullable: 0
+  is_serializable: 1
 
 =head2 description
 
   data_type: 'text'
   is_nullable: 1
+  is_serializable: 1
 
 =head2 keep
 
@@ -49,11 +64,16 @@ __PACKAGE__->table("Views");
 
 __PACKAGE__->add_columns(
   "project",
-  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
+  {
+    data_type       => "text",
+    is_foreign_key  => 1,
+    is_nullable     => 0,
+    is_serializable => 1,
+  },
   "name",
-  { data_type => "text", is_nullable => 0 },
+  { data_type => "text", is_nullable => 0, is_serializable => 1 },
   "description",
-  { data_type => "text", is_nullable => 1 },
+  { data_type => "text", is_nullable => 1, is_serializable => 1 },
   "keep",
   { data_type => "integer", default_value => 0, is_nullable => 0 },
 );
@@ -105,7 +125,7 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-01-22 13:29:36
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Vyd2+0RAF3XGTpq3KswfAQ
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-27 16:37:57
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:XnU0XZqC2j7zx2pofTGPCg
 
 1;

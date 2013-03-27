@@ -15,6 +15,18 @@ use warnings;
 
 use base 'DBIx::Class::Core';
 
+=head1 COMPONENTS LOADED
+
+=over 4
+
+=item * L<DBIx::Class::Helper::Row::ToJSON>
+
+=back
+
+=cut
+
+__PACKAGE__->load_components("Helper::Row::ToJSON");
+
 =head1 TABLE: C<SchemaVersion>
 
 =cut
@@ -33,8 +45,8 @@ __PACKAGE__->table("SchemaVersion");
 __PACKAGE__->add_columns("version", { data_type => "integer", is_nullable => 0 });
 
 
-# Created by DBIx::Class::Schema::Loader v0.07014 @ 2012-02-29 00:47:18
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:LFD28W0GvvrOOylCM98SEQ
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-27 16:37:57
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:JdUnXdKbhfDA6VEnaFoD3Q
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

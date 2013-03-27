@@ -17,6 +17,7 @@ with pkgs;
   perlPackages.CryptRandPasswd
   perlPackages.DBDPg
   perlPackages.DBDSQLite
+  perlPackages.DBIxClassHelpers
   perlPackages.DataDump
   perlPackages.DateTime
   perlPackages.DigestSHA1
