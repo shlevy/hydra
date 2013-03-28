@@ -151,6 +151,7 @@ in
 
     systemd.services."hydra-init" =
       { wantedBy = [ "multi-user.target" ];
+        after = [ "postgresql.service" ];
         environment = env;
         script = ''
           mkdir -p ${baseDir}/data
