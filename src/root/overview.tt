@@ -24,7 +24,7 @@
     </tr>
   </thead>
   <tbody>
-    [% FOREACH p IN projects %]
+    [% FOREACH p IN resource %]
     <tr>
       <td><span class="[% IF !p.enabled %]disabled-project[% END %] [%+ IF p.hidden %]hidden-project[% END %]">[% INCLUDE renderProjectName project=p.name inRow=1 %]</span></td>
       <td>[% HTML.escape(p.displayname) %]</td>

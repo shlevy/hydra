@@ -2,7 +2,7 @@
 [% PROCESS common.tt %]
 
 <table class="table table-condensed table-striped">
-  [% FOREACH m IN machines %]
+  [% FOREACH m IN resource.machines %]
     <thead>
       <tr>
         <th colspan="5">
@@ -16,7 +16,7 @@
     </thead>
     <tbody>
       [% idle = 1 %]
-      [% FOREACH step IN steps %]
+      [% FOREACH step IN resource.steps %]
         [% IF step.machine.match('@(.*)').0 == m.key %]
           [% idle = 0 %]
           <tr>

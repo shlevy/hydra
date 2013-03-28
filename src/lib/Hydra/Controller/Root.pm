@@ -8,6 +8,7 @@ use Hydra::Helper::CatalystUtils;
 use Digest::SHA1 qw(sha1_hex);
 use Nix::Store;
 use Nix::Config;
+use POSIX;
 
 # Put this controller at top-level.
 __PACKAGE__->config->{namespace} = '';
@@ -31,18 +32,29 @@ sub begin :Private {
     $c->forward('deserialize');
 }
 
-sub deserialize : ActionClass('Deserialize') {}
+sub deserialize :ActionClass('Deserialize') {}
 
 
-sub index :Path :Args(0) {
+sub index :Path :Args(0) :ActionClass('REST') { }
+
+sub index_GET {
     my ($self, $c) = @_;
     $c->stash->{template} = 'overview.tt';
-    $c->stash->{projects} = [$c->model('DB::Projects')->search(isAdmin($c) ? {} : {hidden => 0}, {order_by => 'name'})];
     $c->stash->{newsItems} = [$c->model('DB::NewsItems')->search({}, { order_by => ['createtime DESC'], rows => 5 })];
+    self->status_ok(
+        $c,
+        entity => [ $c->model('DB::Projects')->search(
+            isAdmin($c) ? {} : {hidden => 0},
+            {
+                order_by => 'name',
+                columns => [ 'enabled', 'hidden', 'name', 'displayname', 'homepage', 'description' ],
+            }
+        )]
+    );
 }
 
 
-sub queue :Local : ActionClass('REST') { }
+sub queue :Local :Args(0) :ActionClass('REST') { }
 
 sub queue_GET {
     my ($self, $c) = @_;
@@ -51,7 +63,7 @@ sub queue_GET {
     $self->status_ok(
         $c,
         entity => [$c->model('DB::Builds')->search(
-            {finished => 0}, { join => ['project'], order_by => ["priority DESC", "timestamp"], columns => [@buildListColumns], '+select' => ['project.enabled'], '+as' => ['enabled'], result_class => 'DBIx::Class::ResultClass::HashRefInflator' })]
+            {finished => 0}, { join => ['project'], order_by => ["priority DESC", "timestamp"], columns => [@buildListColumns], '+select' => ['project.enabled'], '+as' => ['enabled'] })]
     );
 }
 
@@ -80,17 +92,35 @@ sub timeline :Local {
 }
 
 
-sub status :Local {
+sub status :Local :Args(0) :ActionClass('REST') { }
+
+sub status_GET {
     my ($self, $c) = @_;
-    $c->stash->{steps} = [ $c->model('DB::BuildSteps')->search(
-        { 'me.busy' => 1, 'build.finished' => 0, 'build.busy' => 1 },
-        { join => [ 'build' ]
-        , order_by => [ 'machine' ]
-        } ) ];
+    $self->status_ok(
+        $c,
+        entity => [ $c->model('DB::BuildSteps')->search(
+            { 'me.busy' => 1, 'build.finished' => 0, 'build.busy' => 1 },
+            { join => { build => [ 'project', 'job', 'jobset' } ]
+              columns => [
+                'me.machine',
+                'me.system',
+                'me.stepnr',
+                'me.drvpath',
+                'me.starttime',
+                'build.id',
+                'project.name',
+                'jobset.name',
+                'job.name',
+            , order_by => [ 'machine' ]
+            }
+        ) ]
+    );
 }
 
 
-sub machines :Local Args(0) {
+sub machines :Local :Args(0) :ActionClass('REST') { }
+
+sub machines_GET {
     my ($self, $c) = @_;
     my $machines = getMachines;
     my $idles = $c->model('DB::BuildSteps')->search(
@@ -99,18 +129,34 @@ sub machines :Local Args(0) {
     while (my $idle = $idles->next) {
         ${$machines}{$idle->machine}{'idle'} = $idle->max_stoptime;
     }
-    $c->stash->{machines} = $machines;
-    $c->stash->{steps} = [ $c->model('DB::BuildSteps')->search(
-        { finished => 0, 'me.busy' => 1, 'build.busy' => 1, },
-        { join => [ 'build' ]
-        , order_by => [ 'machine', 'stepnr' ]
-        } ) ];
     $c->stash->{template} = 'machine-status.tt';
+    $self->status_ok(
+        $c,
+        entity => {
+            machines => $machines,
+            steps => [ $c->model('DB::BuildSteps')->search(
+                { finished => 0, 'me.busy' => 1, 'build.busy' => 1, },
+                { join => { build => [ 'project', 'job', 'jobset' } ]
+                 , columns => [
+                      'me.machine',
+                      'me.system',
+                      'me.drvpath',
+                      'me.starttime',
+                      'build.id',
+                      'project.name',
+                      'jobset.name',
+                      'job.name',
+                  ]
+                , order_by => [ 'machine', 'stepnr' ]
+                }
+            ) ]
+        }
+    );
 }
 
 
 # Hydra::Base::Controller::ListBuilds needs this.
-sub get_builds : Chained('/') PathPart('') CaptureArgs(0) {
+sub get_builds :Chained('/') :PathPart :CaptureArgs(0) {
     my ($self, $c) = @_;
     $c->stash->{allBuilds} = $c->model('DB::Builds');
     $c->stash->{jobStatus} = $c->model('DB')->resultset('JobStatus');
@@ -121,7 +167,7 @@ sub get_builds : Chained('/') PathPart('') CaptureArgs(0) {
 }
 
 
-sub robots_txt : Path('robots.txt') {
+sub robots_txt :Path('robots.txt') {
     my ($self, $c) = @_;
 
     sub uri_for {
@@ -163,17 +209,20 @@ sub robots_txt : Path('robots.txt') {
         );
 
     $c->stash->{'plain'} = { data => "User-agent: *\n" . join('', map { "Disallow: $_\n" } @rules) };
-    $c->forward('Hydra::View::Plain');
+    $c->stash->{current_view} = 'Hydra::View::Plain';
 }
 
 
 sub default :Path {
     my ($self, $c) = @_;
-    notFound($c, "Page not found.");
+    $self->status_not_found(
+        $c,
+        message => "Page not found."
+    );
 }
 
 
-sub end : ActionClass('RenderView') {
+sub end :ActionClass('RenderView') {
     my ($self, $c) = @_;
 
     if (scalar @{$c->error}) {
@@ -185,7 +234,6 @@ sub end : ActionClass('RenderView') {
             $c->stash->{httpStatus} =
                 $c->response->status . " " . HTTP::Status::status_message($c->response->status);
         }
-
     }
 
     $c->forward('serialize');
@@ -200,12 +248,14 @@ sub nar :Local :Args(1) {
     $path = ($ENV{NIX_STORE_DIR} || "/nix/store")."/$path";
 
     if (!isValidPath($path)) {
-        $c->response->status(410); # "Gone"
-        error($c, "Path " . $path . " is no longer available.");
+        $self->status_gone(
+            $c,
+            message => "Path " . $path . " is no longer available."
+        );
+    } else {
+        $c->stash->{current_view} = 'NixNAR';
+        $c->stash->{storePath} = $path;
     }
-
-    $c->stash->{current_view} = 'NixNAR';
-    $c->stash->{storePath} = $path;
 }
 
 
@@ -220,7 +270,7 @@ sub nix_cache_info :Path('nix-cache-info') :Args(0) {
         # static binary cache http://nixos.org/binary-cache).
         "Priority: 100\n"
     };
-    $c->forward('Hydra::View::Plain');
+    $c->stash->{current_view} = 'Hydra::View::Plain';
 }
 
 
@@ -241,14 +291,16 @@ sub narinfo :LocalRegex('^([a-z0-9]+).narinfo$') :Args(0) {
 }
 
 
-sub logo :Local {
+sub logo :Local :Args(0) {
     my ($self, $c) = @_;
     my $path = $ENV{"HYDRA_LOGO"} or die("Logo not set!");
     $c->serve_static_file($path);
 }
 
 
-sub evals :Local Args(0) {
+sub evals :Local :Args(0) :ActionClass('REST') { }
+
+sub evals_GET {
     my ($self, $c) = @_;
 
     $c->stash->{template} = 'evals.tt';
@@ -259,51 +311,82 @@ sub evals :Local Args(0) {
 
     my $evals = $c->model('DB::JobsetEvals');
 
-    $c->stash->{page} = $page;
     $c->stash->{resultsPerPage} = $resultsPerPage;
-    $c->stash->{total} = $evals->search({hasnewbuilds => 1})->count;
-    $c->stash->{evals} = getEvals($self, $c, $evals, ($page - 1) * $resultsPerPage, $resultsPerPage)
+    $c->stash->{page} = $page;
+    my %entity = (
+        evals => getEvals($self, $c, $evals, ($page - 1) * $resultsPerPage, $resultsPerPage),
+        total => $evals->search({hasnewbuilds => 1})->count,
+        first => "?page=1",
+        last => "?page=" . POSIX::ceil($total/$resultsPerPage)
+    )
+    if ($page > 1) {
+        $entity{previous} = "?page=" . $page - 1;
+    }
+    if ($page < $entity{last}) {
+        $entity{next} = "?page=" . $page + 1;
+    }
+    $self->status_ok(
+        $c,
+        entity => \%entity
+    );
 }
 
 
-sub search :Local Args(0) {
+sub search :Local :Args(0) :ActionClass('REST') { }
+
+sub search_POST {
     my ($self, $c) = @_;
     $c->stash->{template} = 'search.tt';
 
     my $query = trim $c->request->params->{"query"};
 
-    error($c, "Query is empty.") if $query eq "";
-    error($c, "Invalid character in query.")
-        unless $query =~ /^[a-zA-Z0-9_\-]+$/;
+    if ($query eq "") {
+        $self->status_bad_request(
+            $c,
+            message => "Query is empty"
+        );
+    } elif ($query !~ /^[a-zA-Z0-9_\-]+$/) {
+        $self->status_bad_request(
+            $c,
+            message => "Invalid character in query."
+        );
+    } else {
+        $c->stash->{limit} = 500;
 
-    $c->stash->{limit} = 500;
-
-    $c->stash->{projects} = [ $c->model('DB::Projects')->search(
-        { -and =>
-            [ { -or => [ name => { ilike => "%$query%" }, displayName => { ilike => "%$query%" }, description => { ilike => "%$query%" } ] }
-            , { hidden => 0 }
-            ]
-        },
-        { order_by => ["name"] } ) ];
-
-    $c->stash->{jobsets} = [ $c->model('DB::Jobsets')->search(
-        { -and =>
-            [ { -or => [ "me.name" => { ilike => "%$query%" }, "me.description" => { ilike => "%$query%" } ] }
-            , { "project.hidden" => 0, "me.hidden" => 0 }
-            ]
-        },
-        { order_by => ["project", "name"], join => ["project"] } ) ];
-
-    $c->stash->{jobs} = [ $c->model('DB::Jobs')->search(
-        { "me.name" => { ilike => "%$query%" }
-        , "project.hidden" => 0
-        , "jobset.hidden" => 0
-        },
-        { order_by => ["enabled_ desc", "project", "jobset", "name"], join => ["project", "jobset"]
-        , "+select" => [\ "(project.enabled = 1 and jobset.enabled = 1 and exists (select 1 from Builds where project = project.name and jobset = jobset.name and job = me.name and iscurrent = 1)) enabled_"]
-        , "+as" => ["enabled"]
-        , rows => $c->stash->{limit} + 1
-        } ) ];
+        $self->status_ok(
+            $c,
+            entity => {
+              projects => [ $c->model('DB::Projects')->search(
+                  { -and =>
+                      [ { -or => [ name => { ilike => "%$query%" }, displayName => { ilike => "%$query%" }, description => { ilike => "%$query%" } ] }
+                      , { hidden => 0 }
+                      ]
+                  },
+                  { order_by => ["name"], columns => [ 'enabled' 'name' 'description' ] } ) ],
+              jobsets => [ $c->model('DB::Jobsets')->search(
+                  { -and =>
+                      [ { -or => [ "me.name" => { ilike => "%$query%" }, "me.description" => { ilike => "%$query%" } ] }
+                      , { "project.hidden" => 0, "me.hidden" => 0 }
+                      ]
+                  },
+                  {
+                      order_by => ["project", "name"],
+                      join => ["project"],
+                      columns => [ "me.project", "me.name", "me.enabled", "me.description" ]
+                  } ) ],
+              jobs => [ $c->model('DB::Jobs')->search(
+                  { "me.name" => { ilike => "%$query%" }
+                  , "project.hidden" => 0
+                  , "jobset.hidden" => 0
+                  },
+                  { order_by => ["enabled_ desc", "project", "jobset", "name"], join => ["project", "jobset"]
+                  , "+select" => [\ "(project.enabled = 1 and jobset.enabled = 1 and exists (select 1 from Builds where project = project.name and jobset = jobset.name and job = me.name and iscurrent = 1)) enabled_", "me.project", "me.jobset", "me.name" ]
+                  , "+as" => ["enabled", "project", "jobset", "name"]
+                  , rows => $c->stash->{limit} + 1
+                  } ) ]
+            }
+        );
+    }
 }
 
 

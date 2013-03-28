@@ -387,10 +387,10 @@ BLOCK renderInputDiff; %]
 BLOCK renderPager %]
   <div class="pagination">
     <ul>
-      <li><a href="[% "$baseUri?page=1" %]">First</a></li>
-      <li [% IF page == 1 %]class="disabled"[% END %]><a href="[% "$baseUri?page="; (page - 1) %]">Previous</a></li>
-      <li [% IF page * resultsPerPage >= total %]class="disabled"[% END %]><a href="[% "$baseUri?page="; (page + 1) %]">Next</a></li>
-      <li><a href="[% "$baseUri?page="; (total - 1) div resultsPerPage + 1 %]">Last</a></li>
+      <li><a href="[% resource.first %]">First</a></li>
+      <li [% IF resource.previous %]class="disabled"[% END %]><a href="[% resource.previous or resource.first %]">Previous</a></li>
+      <li [% IF resource.next %]class="disabled"[% END %]><a href="[% resource.next or resource.last %]">Next</a></li>
+      <li><a href="[% resource.last %]">Last</a></li>
     </ul>
   </div>
 [% END;
@@ -423,7 +423,7 @@ BLOCK renderEvals %]
       </tr>
     </thead>
     <tbody>
-      [% FOREACH e IN evals;
+      [% FOREACH e IN resource.evals;
         eval = e.eval;
         link = c.uri_for(c.controller('JobsetEval').action_for('view'), [eval.id]) %]
         <tr>
