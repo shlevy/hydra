@@ -32,7 +32,7 @@ sub begin :Private {
     $c->forward('deserialize');
 }
 
-sub deserialize :ActionClass('Deserialize') {}
+sub deserialize :ActionClass('Deserialize') { }
 
 
 sub index :Path :Args(0) :ActionClass('REST') { }
@@ -111,6 +111,7 @@ sub status_GET {
                 'project.name',
                 'jobset.name',
                 'job.name',
+              ],
             , order_by => [ 'machine' ]
             }
         ) ]
