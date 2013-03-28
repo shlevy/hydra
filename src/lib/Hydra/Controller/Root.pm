@@ -108,9 +108,9 @@ sub status_GET {
                 'me.drvpath',
                 'me.starttime',
                 'build.id',
-                'project.name',
-                'jobset.name',
-                'job.name',
+                'build.project.name',
+                'build.jobset.name',
+                'build.job.name',
               ],
             , order_by => [ 'machine' ]
             }
@@ -144,9 +144,9 @@ sub machines_GET {
                       'me.drvpath',
                       'me.starttime',
                       'build.id',
-                      'project.name',
-                      'jobset.name',
-                      'job.name'
+                      'build.project.name',
+                      'build.jobset.name',
+                      'build.job.name'
                   ]
                 , order_by => [ 'machine', 'stepnr' ]
                 }
@@ -382,8 +382,9 @@ sub search_POST {
                   , "jobset.hidden" => 0
                   },
                   { order_by => ["enabled_ desc", "project", "jobset", "name"], join => ["project", "jobset"]
-                  , "+select" => [\ "(project.enabled = 1 and jobset.enabled = 1 and exists (select 1 from Builds where project = project.name and jobset = jobset.name and job = me.name and iscurrent = 1)) enabled_", "me.project", "me.jobset", "me.name" ]
-                  , "+as" => ["enabled", "project", "jobset", "name"]
+                  , columns => [ "me.project", "me.jobset", "me.name" ]
+                  , "+select" => [\ "(project.enabled = 1 and jobset.enabled = 1 and exists (select 1 from Builds where project = project.name and jobset = jobset.name and job = me.name and iscurrent = 1)) enabled_" ]
+                  , "+as" => ["enabled"]
                   , rows => $c->stash->{limit} + 1
                   } ) ]
             }
