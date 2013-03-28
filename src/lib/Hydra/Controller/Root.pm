@@ -347,7 +347,7 @@ sub search_POST {
             $c,
             message => "Query is empty"
         );
-    } elif ($query !~ /^[a-zA-Z0-9_\-]+$/) {
+    } elsif ($query !~ /^[a-zA-Z0-9_\-]+$/) {
         $self->status_bad_request(
             $c,
             message => "Invalid character in query."
@@ -364,7 +364,7 @@ sub search_POST {
                       , { hidden => 0 }
                       ]
                   },
-                  { order_by => ["name"], columns => [ 'enabled' 'name' 'description' ] } ) ],
+                  { order_by => ["name"], columns => [ 'enabled', 'name', 'description' ] } ) ],
               jobsets => [ $c->model('DB::Jobsets')->search(
                   { -and =>
                       [ { -or => [ "me.name" => { ilike => "%$query%" }, "me.description" => { ilike => "%$query%" } ] }
