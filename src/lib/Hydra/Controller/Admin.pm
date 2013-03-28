@@ -60,7 +60,7 @@ sub failedcache_DELETE {
 
 sub vcscache : Chained('admin') PathPart('vcs-cache') Args(0) : ActionClass('REST') { }
 
-sub vscache_DELETE {
+sub vcscache_DELETE {
     my ($self, $c) = @_;
 
     print "Clearing path cache\n";
