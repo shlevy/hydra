@@ -41,7 +41,7 @@ sub index_GET {
     my ($self, $c) = @_;
     $c->stash->{template} = 'overview.tt';
     $c->stash->{newsItems} = [$c->model('DB::NewsItems')->search({}, { order_by => ['createtime DESC'], rows => 5 })];
-    self->status_ok(
+    $self->status_ok(
         $c,
         entity => [ $c->model('DB::Projects')->search(
             isAdmin($c) ? {} : {hidden => 0},
