@@ -387,7 +387,7 @@ sub search_POST {
                   },
                   { order_by => ["enabled_ desc", "project", "jobset", "name"], join => ["project", "jobset"]
                   , columns => [ "me.project", "me.jobset", "me.name" ]
-                  , "+select" => [\ "(project.enabled = 1 and jobset.enabled = 1 and exists (select 1 from Builds where project = project.name and jobset = jobset.name and job = me.name and iscurrent = 1)) enabled_"]
+                  , "+select" => [\ "(project.enabled = 1 and jobset.enabled = 1 and exists (select 1 from Builds where project = project.name and jobset = jobset.name and job = me.name and iscurrent = 1)) as enabled_"]
                   , "+as" => ["enabled"]
                   , rows => $c->stash->{limit} + 1
                   } ) ]
