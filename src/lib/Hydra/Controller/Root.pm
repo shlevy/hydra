@@ -136,7 +136,7 @@ sub machines_GET {
             machines => $machines,
             steps => [ $c->model('DB::BuildSteps')->search(
                 { finished => 0, 'me.busy' => 1, 'build.busy' => 1, },
-                { join => { build => [ 'project', 'job', 'jobset' } ]
+                { join => { build => [ 'project', 'job', 'jobset' ] }
                  , columns => [
                       'me.machine',
                       'me.system',
