@@ -101,7 +101,7 @@ sub status_GET {
         entity => [ $c->model('DB::BuildSteps')->search(
             { 'me.busy' => 1, 'build.finished' => 0, 'build.busy' => 1 },
             { join => { build => [ 'project', 'job', 'jobset' ] }
-              columns => [
+            , columns => [
                 'me.machine',
                 'me.system',
                 'me.stepnr',
@@ -138,7 +138,7 @@ sub machines_GET {
             steps => [ $c->model('DB::BuildSteps')->search(
                 { finished => 0, 'me.busy' => 1, 'build.busy' => 1, },
                 { join => { build => [ 'project', 'job', 'jobset' ] }
-                 , columns => [
+                , columns => [
                       'me.machine',
                       'me.system',
                       'me.drvpath',
@@ -319,7 +319,7 @@ sub evals_GET {
         total => $evals->search({hasnewbuilds => 1})->count,
         first => "?page=1",
         last => "?page=" . POSIX::ceil($total/$resultsPerPage)
-    )
+    );
     if ($page > 1) {
         $entity{previous} = "?page=" . $page - 1;
     }
