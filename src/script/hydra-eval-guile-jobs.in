@@ -2,16 +2,14 @@
 # Aside from this initial boilerplate, this is actually -*- scheme -*- code.
 main="(module-ref (resolve-interface '(hydra-eval-guile-jobs)) 'eval-guile-jobs)"
 
-# Make sure no undeclared dependency is leaked.  Guix has to be
-# provided as an input through Hydra.  Guix itself must thus be built via a
-# recipe written in the Nix language.
-unset GUILE_LOAD_PATH
-unset GUILE_LOAD_COMPILED_PATH
+# Keep the host's GUILE_LOAD_PATH unchanged to allow the installed Guix to
+# be used.  This moves Guix modules possibly out of control, but solves
+# bootstrapping issues.
 
 exec ${GUILE:-@GUILE@} --no-auto-compile   \
   -l "$0" -c "(apply $main (cdr (command-line)))" "$@"
 !#
-;;; Copyright (C) 2012  Ludovic Courtès <ludo@gnu.org>
+;;; Copyright © 2012, 2013 Ludovic Courtès <ludo@gnu.org>
 ;;;
 ;;; Hydra is free software: you can redistribute it and/or modify
 ;;; it under the terms of the GNU General Public License as published by
@@ -91,13 +89,15 @@ symbol/thunk pairs."
                 ;; XXX: Add <arg ...> tags?
                 `(job (@ (jobName ,name)
                          (drvPath ,drv)
-                         (outPath
-                          ;; Resolve Guix modules lazily.
-                          ,((guix-variable 'derivations
-                                           'derivation-path->output-path)
-                            drv))
                          ,@(opt-attr 'homepage 'home-page)
-                         ,@(opt-attr 'license 'license)
+                         (license
+                          ,(let loop ((license (assoc-ref result 'license)))
+                             (match license
+                               ((? struct?)
+                                (struct-ref license 0))
+                               ((l ...)
+                                (string-join (map loop l)))
+                               (_ ""))))
                          ,@(opt-attr 'description 'description)
                          ,@(opt-attr 'longDescription 'long-description)
                          (maintainers
@@ -121,6 +121,14 @@ symbol/thunk pairs."
                              (compose %derivation-system
                                       (guix-variable 'derivations
                                                      'read-derivation)))))
+                      ;; Resolve Guix modules lazily.
+                      ,(map (match-lambda
+                             ((name . path)
+                              `(output (@ (name ,name) (path ,path)))))
+                            ((guix-variable 'derivations
+                                            'derivation-path->output-paths)
+                              drv))
+
                       "\n"))))
             jobs))))
 

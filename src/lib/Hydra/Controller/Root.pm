@@ -127,7 +127,7 @@ sub machines_GET {
             { stoptime => { '!=', undef } },
             { select => [ 'machine', { max => 'stoptime', -as => 'max_stoptime' }], group_by => "machine" });
     while (my $idle = $idles->next) {
-        ${$machines}{$idle->machine}{'idle'} = $idle->max_stoptime;
+        ${$machines}{$idle->machine}{'idle'} = $idle->get_column('max_stoptime');
     }
     $c->stash->{template} = 'machine-status.tt';
     $self->status_ok(
