@@ -108,9 +108,11 @@ sub status_GET {
                 'me.drvpath',
                 'me.starttime',
                 'build.id',
-                'project.name' => 'build.project.name',
-                'jobset.name' => 'build.jobset.name',
-                'job.name' => 'build.job.name',
+                {
+                  'project.name' => 'build.project.name',
+                  'jobset.name' => 'build.jobset.name',
+                  'job.name' => 'build.job.name'
+                }
               ],
             , order_by => [ 'machine' ]
             }
@@ -144,9 +146,11 @@ sub machines_GET {
                       'me.drvpath',
                       'me.starttime',
                       'build.id',
-                      'project.name' => 'build.project.name',
-                      'jobset.name' => 'build.jobset.name',
-                      'job.name' => 'build.job.name',
+                      {
+                        'project.name' => 'build.project.name',
+                        'jobset.name' => 'build.jobset.name',
+                        'job.name' => 'build.job.name'
+                      }
                   ]
                 , order_by => [ 'machine', 'stepnr' ]
                 }
