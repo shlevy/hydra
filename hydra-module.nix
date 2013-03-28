@@ -159,6 +159,7 @@ in
           ${pkgs.shadow}/bin/su hydra -c ${cfg.hydra}/bin/hydra-init
         '';
         serviceConfig.Type = "oneshot";
+        serviceConfig.RemainAfterExit = true;
       };
     
     systemd.services."hydra-server" =
