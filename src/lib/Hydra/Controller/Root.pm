@@ -314,9 +314,10 @@ sub evals_GET {
 
     $c->stash->{resultsPerPage} = $resultsPerPage;
     $c->stash->{page} = $page;
+    my $total = $evals->search({hasnewbuilds => 1})->count;
     my %entity = (
         evals => getEvals($self, $c, $evals, ($page - 1) * $resultsPerPage, $resultsPerPage),
-        total => $evals->search({hasnewbuilds => 1})->count,
+        total => $total,
         first => "?page=1",
         last => "?page=" . POSIX::ceil($total/$resultsPerPage)
     );
