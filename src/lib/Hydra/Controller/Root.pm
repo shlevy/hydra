@@ -100,7 +100,7 @@ sub status_GET {
         $c,
         entity => [ $c->model('DB::BuildSteps')->search(
             { 'me.busy' => 1, 'build.finished' => 0, 'build.busy' => 1 },
-            { join => { build => [ 'project', 'job', 'jobset' } ]
+            { join => { build => [ 'project', 'job', 'jobset' ] }
               columns => [
                 'me.machine',
                 'me.system',
@@ -145,7 +145,7 @@ sub machines_GET {
                       'build.id',
                       'project.name',
                       'jobset.name',
-                      'job.name',
+                      'job.name'
                   ]
                 , order_by => [ 'machine', 'stepnr' ]
                 }
