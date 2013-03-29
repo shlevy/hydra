@@ -2,10 +2,27 @@
 , officialRelease ? false
 }:
 
-rec {
+let
+  config.perlPackageOverrides = p: {
+    DBIxClass = with p.perlPackages; buildPerlPackage {
+      name = "DBIx-Class-0.08242-TRIAL";
+      src = fetchurl {
+        url = http://cpan.metacpan.org/authors/id/R/RI/RIBASUSHI/DBIx-Class-0.08242-TRIAL.tar.gz;
+        sha256 = "1hhn07ib47qgpx8ddji2lrhwdivdgaz8dzy5fpfb9vjpb37m7jxp";
+      };
+      buildInputs = [ DBDSQLite PackageStash TestException TestWarn TestDeep ];
+      propagatedBuildInputs = [ ClassAccessorGrouped ClassC3Componentised ClassInspector ClassMethodModifiers ConfigAny ContextPreserve DataCompare DataDumperConcise DataPage DBI DevelGlobalDestruction HashMerge ModuleFind Moo MROCompat namespaceclean PathClass ScopeGuard SQLAbstract strictures SubName TryTiny ];
+      meta = {
+        homepage = http://www.dbix-class.org/;
+        description = "Extensible and flexible object <-> relational mapper";
+        license = "perl";
+      };
+    };
+  };
+in rec {
 
   tarball =
-    with import <nixpkgs> { };
+    with import <nixpkgs> { inherit config; };
 
     releaseTools.makeSourceTarball {
       name = "hydra-tarball";
@@ -43,7 +60,7 @@ rec {
   build =
     { system ? "x86_64-linux" }:
 
-    let pkgs = import <nixpkgs> {inherit system;}; in
+    let pkgs = import <nixpkgs> {inherit system config;}; in
 
     with pkgs;
 
