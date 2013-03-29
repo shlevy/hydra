@@ -19,13 +19,13 @@ use base 'DBIx::Class::Core';
 
 =over 4
 
-=item * L<DBIx::Class::Helper::Row::ToJSON>
+=item * L<Hydra::Component::ToJSON>
 
 =back
 
 =cut
 
-__PACKAGE__->load_components("Helper::Row::ToJSON");
+__PACKAGE__->load_components("+Hydra::Component::ToJSON");
 
 =head1 TABLE: C<CachedCVSInputs>
 
@@ -39,13 +39,11 @@ __PACKAGE__->table("CachedCVSInputs");
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =head2 module
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =head2 timestamp
 
@@ -61,29 +59,27 @@ __PACKAGE__->table("CachedCVSInputs");
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =head2 storepath
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =cut
 
 __PACKAGE__->add_columns(
   "uri",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
   "module",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
   "timestamp",
   { data_type => "integer", is_nullable => 0 },
   "lastseen",
   { data_type => "integer", is_nullable => 0 },
   "sha256hash",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
   "storepath",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
 );
 
 =head1 PRIMARY KEY
@@ -103,8 +99,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("uri", "module", "sha256hash");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-27 16:37:57
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:K9oM047ZXzljZFewqJBr5A
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-29 08:59:41
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:WuNd0o9GjrOIEIGKS5ixRA
 
 # You can replace this text with custom content, and it will be preserved on regeneration
 1;

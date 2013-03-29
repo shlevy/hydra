@@ -19,13 +19,13 @@ use base 'DBIx::Class::Core';
 
 =over 4
 
-=item * L<DBIx::Class::Helper::Row::ToJSON>
+=item * L<Hydra::Component::ToJSON>
 
 =back
 
 =cut
 
-__PACKAGE__->load_components("Helper::Row::ToJSON");
+__PACKAGE__->load_components("+Hydra::Component::ToJSON");
 
 =head1 TABLE: C<Users>
 
@@ -39,25 +39,21 @@ __PACKAGE__->table("Users");
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =head2 fullname
 
   data_type: 'text'
   is_nullable: 1
-  is_serializable: 1
 
 =head2 emailaddress
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =head2 password
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =head2 emailonerror
 
@@ -69,13 +65,13 @@ __PACKAGE__->table("Users");
 
 __PACKAGE__->add_columns(
   "username",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
   "fullname",
-  { data_type => "text", is_nullable => 1, is_serializable => 1 },
+  { data_type => "text", is_nullable => 1 },
   "emailaddress",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
   "password",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
   "emailonerror",
   { data_type => "integer", default_value => 0, is_nullable => 0 },
 );
@@ -165,8 +161,8 @@ Composing rels: L</projectmembers> -> project
 __PACKAGE__->many_to_many("projects", "projectmembers", "project");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-27 16:37:57
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:43R6KmvDvoFLQ66KRTKyHQ
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-29 08:59:41
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:pUmI1xpeU43QtVgTuBEteg
 # These lines were loaded from '/home/rbvermaa/src/hydra/src/lib/Hydra/Schema/Users.pm' found in @INC.
 # They are now part of the custom portion of this file
 # for you to hand-edit.  If you do not either delete

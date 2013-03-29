@@ -19,13 +19,13 @@ use base 'DBIx::Class::Core';
 
 =over 4
 
-=item * L<DBIx::Class::Helper::Row::ToJSON>
+=item * L<Hydra::Component::ToJSON>
 
 =back
 
 =cut
 
-__PACKAGE__->load_components("Helper::Row::ToJSON");
+__PACKAGE__->load_components("+Hydra::Component::ToJSON");
 
 =head1 TABLE: C<JobsetEvalInputs>
 
@@ -45,7 +45,6 @@ __PACKAGE__->table("JobsetEvalInputs");
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =head2 altnr
 
@@ -56,25 +55,21 @@ __PACKAGE__->table("JobsetEvalInputs");
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =head2 uri
 
   data_type: 'text'
   is_nullable: 1
-  is_serializable: 1
 
 =head2 revision
 
   data_type: 'text'
   is_nullable: 1
-  is_serializable: 1
 
 =head2 value
 
   data_type: 'text'
   is_nullable: 1
-  is_serializable: 1
 
 =head2 dependency
 
@@ -86,13 +81,11 @@ __PACKAGE__->table("JobsetEvalInputs");
 
   data_type: 'text'
   is_nullable: 1
-  is_serializable: 1
 
 =head2 sha256hash
 
   data_type: 'text'
   is_nullable: 1
-  is_serializable: 1
 
 =cut
 
@@ -100,23 +93,23 @@ __PACKAGE__->add_columns(
   "eval",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 0 },
   "name",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
   "altnr",
   { data_type => "integer", is_nullable => 0 },
   "type",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
   "uri",
-  { data_type => "text", is_nullable => 1, is_serializable => 1 },
+  { data_type => "text", is_nullable => 1 },
   "revision",
-  { data_type => "text", is_nullable => 1, is_serializable => 1 },
+  { data_type => "text", is_nullable => 1 },
   "value",
-  { data_type => "text", is_nullable => 1, is_serializable => 1 },
+  { data_type => "text", is_nullable => 1 },
   "dependency",
   { data_type => "integer", is_foreign_key => 1, is_nullable => 1 },
   "path",
-  { data_type => "text", is_nullable => 1, is_serializable => 1 },
+  { data_type => "text", is_nullable => 1 },
   "sha256hash",
-  { data_type => "text", is_nullable => 1, is_serializable => 1 },
+  { data_type => "text", is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -173,8 +166,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-27 16:37:57
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:9fF7Qous2aaRFecp7ksRbg
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-29 08:59:41
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:sFXF6X8iSO6U1owwhA9XJA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

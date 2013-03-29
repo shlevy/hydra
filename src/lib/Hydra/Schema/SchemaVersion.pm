@@ -19,13 +19,13 @@ use base 'DBIx::Class::Core';
 
 =over 4
 
-=item * L<DBIx::Class::Helper::Row::ToJSON>
+=item * L<Hydra::Component::ToJSON>
 
 =back
 
 =cut
 
-__PACKAGE__->load_components("Helper::Row::ToJSON");
+__PACKAGE__->load_components("+Hydra::Component::ToJSON");
 
 =head1 TABLE: C<SchemaVersion>
 
@@ -45,8 +45,8 @@ __PACKAGE__->table("SchemaVersion");
 __PACKAGE__->add_columns("version", { data_type => "integer", is_nullable => 0 });
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-27 16:37:57
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:JdUnXdKbhfDA6VEnaFoD3Q
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-29 08:59:41
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TWJ+5shm+ChnvwCD5KtVfQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

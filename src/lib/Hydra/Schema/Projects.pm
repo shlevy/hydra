@@ -19,13 +19,13 @@ use base 'DBIx::Class::Core';
 
 =over 4
 
-=item * L<DBIx::Class::Helper::Row::ToJSON>
+=item * L<Hydra::Component::ToJSON>
 
 =back
 
 =cut
 
-__PACKAGE__->load_components("Helper::Row::ToJSON");
+__PACKAGE__->load_components("+Hydra::Component::ToJSON");
 
 =head1 TABLE: C<Projects>
 
@@ -39,19 +39,16 @@ __PACKAGE__->table("Projects");
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =head2 displayname
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =head2 description
 
   data_type: 'text'
   is_nullable: 1
-  is_serializable: 1
 
 =head2 enabled
 
@@ -70,36 +67,29 @@ __PACKAGE__->table("Projects");
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
-  is_serializable: 1
 
 =head2 homepage
 
   data_type: 'text'
   is_nullable: 1
-  is_serializable: 1
 
 =cut
 
 __PACKAGE__->add_columns(
   "name",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
   "displayname",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
   "description",
-  { data_type => "text", is_nullable => 1, is_serializable => 1 },
+  { data_type => "text", is_nullable => 1 },
   "enabled",
   { data_type => "integer", default_value => 1, is_nullable => 0 },
   "hidden",
   { data_type => "integer", default_value => 0, is_nullable => 0 },
   "owner",
-  {
-    data_type       => "text",
-    is_foreign_key  => 1,
-    is_nullable     => 0,
-    is_serializable => 1,
-  },
+  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
   "homepage",
-  { data_type => "text", is_nullable => 1, is_serializable => 1 },
+  { data_type => "text", is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -277,8 +267,8 @@ Composing rels: L</projectmembers> -> username
 __PACKAGE__->many_to_many("usernames", "projectmembers", "username");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-27 16:37:57
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:XPJgNz4UqMjJ8SiZHFEFpA
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-29 08:59:41
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:l8H+dsnnbg6ZOiDZ1Fywlg
 # These lines were loaded from '/home/rbvermaa/src/hydra/src/lib/Hydra/Schema/Projects.pm' found in @INC.
 # They are now part of the custom portion of this file
 # for you to hand-edit.  If you do not either delete

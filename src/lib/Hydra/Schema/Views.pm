@@ -19,13 +19,13 @@ use base 'DBIx::Class::Core';
 
 =over 4
 
-=item * L<DBIx::Class::Helper::Row::ToJSON>
+=item * L<Hydra::Component::ToJSON>
 
 =back
 
 =cut
 
-__PACKAGE__->load_components("Helper::Row::ToJSON");
+__PACKAGE__->load_components("+Hydra::Component::ToJSON");
 
 =head1 TABLE: C<Views>
 
@@ -40,19 +40,16 @@ __PACKAGE__->table("Views");
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
-  is_serializable: 1
 
 =head2 name
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =head2 description
 
   data_type: 'text'
   is_nullable: 1
-  is_serializable: 1
 
 =head2 keep
 
@@ -64,16 +61,11 @@ __PACKAGE__->table("Views");
 
 __PACKAGE__->add_columns(
   "project",
-  {
-    data_type       => "text",
-    is_foreign_key  => 1,
-    is_nullable     => 0,
-    is_serializable => 1,
-  },
+  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
   "name",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
   "description",
-  { data_type => "text", is_nullable => 1, is_serializable => 1 },
+  { data_type => "text", is_nullable => 1 },
   "keep",
   { data_type => "integer", default_value => 0, is_nullable => 0 },
 );
@@ -125,7 +117,7 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-27 16:37:57
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:XnU0XZqC2j7zx2pofTGPCg
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-29 08:59:41
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:YnZ3+p9v3kW+YaaIgSHoKQ
 
 1;

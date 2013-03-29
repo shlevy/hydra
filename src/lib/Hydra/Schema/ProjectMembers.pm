@@ -19,13 +19,13 @@ use base 'DBIx::Class::Core';
 
 =over 4
 
-=item * L<DBIx::Class::Helper::Row::ToJSON>
+=item * L<Hydra::Component::ToJSON>
 
 =back
 
 =cut
 
-__PACKAGE__->load_components("Helper::Row::ToJSON");
+__PACKAGE__->load_components("+Hydra::Component::ToJSON");
 
 =head1 TABLE: C<ProjectMembers>
 
@@ -40,32 +40,20 @@ __PACKAGE__->table("ProjectMembers");
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
-  is_serializable: 1
 
 =head2 username
 
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
-  is_serializable: 1
 
 =cut
 
 __PACKAGE__->add_columns(
   "project",
-  {
-    data_type       => "text",
-    is_foreign_key  => 1,
-    is_nullable     => 0,
-    is_serializable => 1,
-  },
+  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
   "username",
-  {
-    data_type       => "text",
-    is_foreign_key  => 1,
-    is_nullable     => 0,
-    is_serializable => 1,
-  },
+  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
 );
 
 =head1 PRIMARY KEY
@@ -115,8 +103,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-27 16:37:57
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:v2H4UPzx7BwIO7m9suM47g
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-29 08:59:41
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Sd6Xq8q8S7N0H7WxpOIFig
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

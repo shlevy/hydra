@@ -19,13 +19,13 @@ use base 'DBIx::Class::Core';
 
 =over 4
 
-=item * L<DBIx::Class::Helper::Row::ToJSON>
+=item * L<Hydra::Component::ToJSON>
 
 =back
 
 =cut
 
-__PACKAGE__->load_components("Helper::Row::ToJSON");
+__PACKAGE__->load_components("+Hydra::Component::ToJSON");
 
 =head1 TABLE: C<ViewJobs>
 
@@ -40,26 +40,22 @@ __PACKAGE__->table("ViewJobs");
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
-  is_serializable: 1
 
 =head2 view_
 
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
-  is_serializable: 1
 
 =head2 job
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =head2 attrs
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =head2 isprimary
 
@@ -71,13 +67,11 @@ __PACKAGE__->table("ViewJobs");
 
   data_type: 'text'
   is_nullable: 1
-  is_serializable: 1
 
 =head2 jobset
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =head2 autorelease
 
@@ -89,29 +83,19 @@ __PACKAGE__->table("ViewJobs");
 
 __PACKAGE__->add_columns(
   "project",
-  {
-    data_type       => "text",
-    is_foreign_key  => 1,
-    is_nullable     => 0,
-    is_serializable => 1,
-  },
+  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
   "view_",
-  {
-    data_type       => "text",
-    is_foreign_key  => 1,
-    is_nullable     => 0,
-    is_serializable => 1,
-  },
+  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
   "job",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
   "attrs",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
   "isprimary",
   { data_type => "integer", default_value => 0, is_nullable => 0 },
   "description",
-  { data_type => "text", is_nullable => 1, is_serializable => 1 },
+  { data_type => "text", is_nullable => 1 },
   "jobset",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
   "autorelease",
   { data_type => "integer", default_value => 0, is_nullable => 0 },
 );
@@ -167,7 +151,7 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-27 16:37:57
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:J60EcqOKIV7Spiz1SgIByQ
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-29 08:59:41
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Zlt+0563DMvZnM8VhVuMCg
 
 1;

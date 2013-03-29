@@ -19,13 +19,13 @@ use base 'DBIx::Class::Core';
 
 =over 4
 
-=item * L<DBIx::Class::Helper::Row::ToJSON>
+=item * L<Hydra::Component::ToJSON>
 
 =back
 
 =cut
 
-__PACKAGE__->load_components("Helper::Row::ToJSON");
+__PACKAGE__->load_components("+Hydra::Component::ToJSON");
 
 =head1 TABLE: C<JobsetInputAlts>
 
@@ -40,21 +40,18 @@ __PACKAGE__->table("JobsetInputAlts");
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
-  is_serializable: 1
 
 =head2 jobset
 
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
-  is_serializable: 1
 
 =head2 input
 
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
-  is_serializable: 1
 
 =head2 altnr
 
@@ -65,44 +62,27 @@ __PACKAGE__->table("JobsetInputAlts");
 
   data_type: 'text'
   is_nullable: 1
-  is_serializable: 1
 
 =head2 revision
 
   data_type: 'text'
   is_nullable: 1
-  is_serializable: 1
 
 =cut
 
 __PACKAGE__->add_columns(
   "project",
-  {
-    data_type       => "text",
-    is_foreign_key  => 1,
-    is_nullable     => 0,
-    is_serializable => 1,
-  },
+  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
   "jobset",
-  {
-    data_type       => "text",
-    is_foreign_key  => 1,
-    is_nullable     => 0,
-    is_serializable => 1,
-  },
+  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
   "input",
-  {
-    data_type       => "text",
-    is_foreign_key  => 1,
-    is_nullable     => 0,
-    is_serializable => 1,
-  },
+  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
   "altnr",
   { data_type => "integer", is_nullable => 0 },
   "value",
-  { data_type => "text", is_nullable => 1, is_serializable => 1 },
+  { data_type => "text", is_nullable => 1 },
   "revision",
-  { data_type => "text", is_nullable => 1, is_serializable => 1 },
+  { data_type => "text", is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -141,7 +121,7 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-27 16:37:57
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:RZ6Nv576s2QyV0TpOkeRiA
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-29 08:59:41
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:4VWtWasPLHw3EocdBsbvzw
 
 1;

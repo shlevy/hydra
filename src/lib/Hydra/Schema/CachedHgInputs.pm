@@ -19,13 +19,13 @@ use base 'DBIx::Class::Core';
 
 =over 4
 
-=item * L<DBIx::Class::Helper::Row::ToJSON>
+=item * L<Hydra::Component::ToJSON>
 
 =back
 
 =cut
 
-__PACKAGE__->load_components("Helper::Row::ToJSON");
+__PACKAGE__->load_components("+Hydra::Component::ToJSON");
 
 =head1 TABLE: C<CachedHgInputs>
 
@@ -39,45 +39,40 @@ __PACKAGE__->table("CachedHgInputs");
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =head2 branch
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =head2 revision
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =head2 sha256hash
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =head2 storepath
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =cut
 
 __PACKAGE__->add_columns(
   "uri",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
   "branch",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
   "revision",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
   "sha256hash",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
   "storepath",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
 );
 
 =head1 PRIMARY KEY
@@ -97,8 +92,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("uri", "branch", "revision");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-27 16:37:57
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:zMJFlfZLvnGtAIHx2E/OgA
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-29 08:59:41
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:akK3CKCk4pp+hmfNAHRKTw
 
 
 # You can replace this text with custom content, and it will be preserved on regeneration

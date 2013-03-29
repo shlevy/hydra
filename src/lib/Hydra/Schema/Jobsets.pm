@@ -19,13 +19,13 @@ use base 'DBIx::Class::Core';
 
 =over 4
 
-=item * L<DBIx::Class::Helper::Row::ToJSON>
+=item * L<Hydra::Component::ToJSON>
 
 =back
 
 =cut
 
-__PACKAGE__->load_components("Helper::Row::ToJSON");
+__PACKAGE__->load_components("+Hydra::Component::ToJSON");
 
 =head1 TABLE: C<Jobsets>
 
@@ -40,39 +40,33 @@ __PACKAGE__->table("Jobsets");
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
-  is_serializable: 1
 
 =head2 project
 
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
-  is_serializable: 1
 
 =head2 description
 
   data_type: 'text'
   is_nullable: 1
-  is_serializable: 1
 
 =head2 nixexprinput
 
   data_type: 'text'
   is_foreign_key: 1
   is_nullable: 0
-  is_serializable: 1
 
 =head2 nixexprpath
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =head2 errormsg
 
   data_type: 'text'
   is_nullable: 1
-  is_serializable: 1
 
 =head2 errortime
 
@@ -111,7 +105,6 @@ __PACKAGE__->table("Jobsets");
 
   data_type: 'text'
   is_nullable: 0
-  is_serializable: 1
 
 =head2 keepnr
 
@@ -123,32 +116,17 @@ __PACKAGE__->table("Jobsets");
 
 __PACKAGE__->add_columns(
   "name",
-  {
-    data_type       => "text",
-    is_foreign_key  => 1,
-    is_nullable     => 0,
-    is_serializable => 1,
-  },
+  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
   "project",
-  {
-    data_type       => "text",
-    is_foreign_key  => 1,
-    is_nullable     => 0,
-    is_serializable => 1,
-  },
+  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
   "description",
-  { data_type => "text", is_nullable => 1, is_serializable => 1 },
+  { data_type => "text", is_nullable => 1 },
   "nixexprinput",
-  {
-    data_type       => "text",
-    is_foreign_key  => 1,
-    is_nullable     => 0,
-    is_serializable => 1,
-  },
+  { data_type => "text", is_foreign_key => 1, is_nullable => 0 },
   "nixexprpath",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
   "errormsg",
-  { data_type => "text", is_nullable => 1, is_serializable => 1 },
+  { data_type => "text", is_nullable => 1 },
   "errortime",
   { data_type => "integer", is_nullable => 1 },
   "lastcheckedtime",
@@ -162,7 +140,7 @@ __PACKAGE__->add_columns(
   "hidden",
   { data_type => "integer", default_value => 0, is_nullable => 0 },
   "emailoverride",
-  { data_type => "text", is_nullable => 0, is_serializable => 1 },
+  { data_type => "text", is_nullable => 0 },
   "keepnr",
   { data_type => "integer", default_value => 3, is_nullable => 0 },
 );
@@ -286,7 +264,7 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-27 16:37:57
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:eyac8I+ctN3wyGtdBd31Jg
+# Created by DBIx::Class::Schema::Loader v0.07033 @ 2013-03-29 08:59:41
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:VxE2HnbIEfYEAOj8FQmMYA
 
 1;
