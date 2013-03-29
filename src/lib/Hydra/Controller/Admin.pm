@@ -27,9 +27,8 @@ sub users_GET {
         $c,
         entity => [$c->model('DB::Users')->search({},{
             order_by => "me.username",
-            columns => [ 'fullname', 'emailonerror', 'username', 'emailaddress' ],
-            prefetch => 'userroles',
-            result_class => 'DBIx::Class::ResultClass::HashRefInflator',
+            columns => [ 'me.fullname', 'me.emailonerror', 'me.username', 'me.emailaddress', 'userroles.role' ],
+            join => [ 'userroles' ],
         })]
     );
 }
