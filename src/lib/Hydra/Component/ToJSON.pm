@@ -8,7 +8,7 @@ use base 'DBIx::Class';
 
 sub TO_JSON {
     my $self = shift;
-    return $self->get_inflated_columns;
+    return { $self->get_inflated_columns };
 }
 
 1;
