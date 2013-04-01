@@ -7,6 +7,41 @@ use Hydra::Helper::Nix;
 use Hydra::Helper::CatalystUtils;
 
 
+sub create_jobset : Chained('project') PathPart('create-jobset') Args(0) {
+    my ($self, $c) = @_;
+
+    requireProjectOwner($c, $c->stash->{project});
+
+    $c->stash->{template} = 'edit-jobset.tt';
+    $c->stash->{create} = 1;
+    $c->stash->{edit} = 1;
+}
+
+
+sub create_jobset_submit : Chained('project') PathPart('create-jobset/submit') Args(0) {
+    my ($self, $c) = @_;
+
+    requireProjectOwner($c, $c->stash->{project});
+
+    my $jobsetName = trim $c->request->params->{name};
+    my $exprType =
+        $c->request->params->{"nixexprpath"} =~ /.scm$/ ? "guile" : "nix";
+
+    error($c, "Invalid jobset name: ‘$jobsetName’") if $jobsetName !~ /^$jobsetNameRE$/;
+
+    txn_do($c->model('DB')->schema, sub {
+        # Note: $jobsetName is validated in updateProject, which will
+        # abort the transaction if the name isn't valid.
+        my $jobset = $c->stash->{project}->jobsets->create(
+            {name => $jobsetName, nixexprinput => "", nixexprpath => "", emailoverride => ""});
+        Hydra::Controller::Jobset::updateJobset($c, $jobset);
+    });
+
+    $c->res->redirect($c->uri_for($c->controller('Jobset')->action_for("index"),
+        [$c->stash->{project}->name, $jobsetName]));
+}
+
+
 sub jobset : Chained('/') PathPart('jobset') CaptureArgs(2) {
     my ($self, $c, $projectName, $jobsetName) = @_;
 

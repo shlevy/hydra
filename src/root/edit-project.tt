@@ -1,7 +1,8 @@
 [% WRAPPER layout.tt title=(create ? "New project" : "Editing project $project.name") %]
 [% PROCESS common.tt %]
 
-<form class="form-horizontal" action="[% IF create %][% c.uri_for('/create-project/submit') %][% ELSE %][% c.uri_for('/project' project.name 'submit') %][% END %]" method="post">
+<form class="form-horizontal" action="[% IF create %][% c.uri_for('/project') %][% ELSE %][% c.uri_for('/project' project.name) %][% END %]" method="post">
+  [% UNLESS create %]<input type="hidden" name="x-tunneled-method" value="PUT" />[% END %]
 
   <fieldset>
 
@@ -59,15 +60,18 @@
         [%IF create %]Create[% ELSE %]Apply changes[% END %]
       </button>
       [% IF !create %]
-        <button id="delete-project" type="submit" class="btn btn-danger" name="submit" value="delete">
-          <i class="icon-trash icon-white"></i>
-          Delete this project
-        </button>
-        <script type="text/javascript">
-          $("#delete-project").click(function() {
-            return confirm("Are you sure you want to delete this project?");
-          });
-        </script>
+        <form action="[% c.uri_for('/project' project.name) %]" method="post">
+          <input type="hidden" name="x-tunneled-method" value="DELETE" />
+          <button id="delete-project" type="submit" class="btn btn-danger" name="submit" value="delete">
+            <i class="icon-trash icon-white"></i>
+            Delete this project
+          </button>
+          <script type="text/javascript">
+            $("#delete-project").click(function() {
+              return confirm("Are you sure you want to delete this project?");
+            });
+          </script>
+        </form>
       [% END %]
     </div>
 

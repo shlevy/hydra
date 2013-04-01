@@ -7,134 +7,168 @@ use Hydra::Helper::Nix;
 use Hydra::Helper::CatalystUtils;
 
 
-sub project : Chained('/') PathPart('project') CaptureArgs(1) {
+sub projects :Path('/project') :ActionClass('REST::ForBrowsers') { }
+
+sub projects_POST {
+    my ($self, $c) = @_;
+
+    requireMayCreateProjects($self, $c);
+
+    my $projectName = trim $c->request->params->{name};
+
+    if ($projectName !~ /^$projectNameRE$/) {
+        $self->status_bad_request(
+            $c,
+            message => "Invalid project name: ‘$projectName’" 
+        );
+    } else {
+        txn_do($c->model('DB')->schema, sub {
+            # Note: $projectName is validated in updateProject,
+            # which will abort the transaction if the name isn't
+            # valid.  Idem for the owner.
+            my $owner = $c->check_user_roles('admin')
+                ? trim $c->request->params->{owner} : $c->user->username;
+            my $project = $c->model('DB::Projects')->create(
+                {name => $projectName, displayname => "", owner => $owner});
+            updateProject($c, $project);
+        });
+
+        my $uri = $c->uri_for($self->action_for("project"), [$projectName]);
+        if ($c->req->looks_like_browser) {
+            $c->res->redirect($uri);
+        } else {
+            $self->status_created(
+                $c,
+                location => $uri
+                entity => $project
+            );
+        }
+}
+
+
+sub projectChain :Chained('/') :PathPart('project') :CaptureArgs(1) {
     my ($self, $c, $projectName) = @_;
 
-    my $project = $c->model('DB::Projects')->find($projectName)
-        or notFound($c, "Project $projectName doesn't exist.");
+    my $project = $c->model('DB::Projects')->find($projectName, { columns => [
+      "me.name",
+      "me.displayName",
+      "me.description",
+      "me.enabled",
+      "me.hidden",
+      "me.homepage",
+      "owner.userName",
+      "owner.fullName",
+      "views.name",
+      "releases.name",
+      "releases.timestamp",
+    ], join => [ 'owner', 'views', 'releases' ], order_by => { -desc => "releases.timestamp" } });
 
-    $c->stash->{project} = $project;
-}
-
-
-sub view : Chained('project') PathPart('') Args(0) {
-    my ($self, $c) = @_;
-
-    $c->stash->{template} = 'project.tt';
-
-    $c->stash->{views} = [$c->stash->{project}->views->all];
-    $c->stash->{jobsets} = [jobsetOverview($c, $c->stash->{project})];
-    $c->stash->{releases} = [$c->stash->{project}->releases->search({},
-        {order_by => ["timestamp DESC"]})];
-}
-
-
-sub edit : Chained('project') PathPart Args(0) {
-    my ($self, $c) = @_;
-
-    requireProjectOwner($c, $c->stash->{project});
-
-    $c->stash->{template} = 'edit-project.tt';
-    $c->stash->{edit} = 1;
-}
-
-
-sub submit : Chained('project') PathPart Args(0) {
-    my ($self, $c) = @_;
-
-    requireProjectOwner($c, $c->stash->{project});
-    requirePost($c);
-
-    if (($c->request->params->{submit} // "") eq "delete") {
-        $c->stash->{project}->delete;
-        return $c->res->redirect($c->uri_for("/"));
+    if ($project) {
+        $c->stash->{project} = $project;
     }
+    else {
+        $self->status_not_found(
+            $c,
+            message => "Project $projectName doesn't exist."
+        );
+        $c->detach;
+    }
+}
+
+
+sub project :Chained('/project') :PathPart('') :ActionClass('REST::ForBrowsers') { }
+
+sub project_GET {
+    my ($self, $c, $projectName) = @_;
+
+    $self->status_ok(
+        $c,
+        entity => {
+          project => $c->stash->{project},
+          #!!! Fixme: Want to JOIN this with the projects query
+          jobsets => $c->stash->{project}->jobsets->search(isProjectOwner($c, $c->stash->{project}) ? {} : { hidden => 0 },
+            { order_by => "name"
+            , "columns" => [ {
+                nrscheduled => "(select count(*) from Builds as a where a.finished = 0 and me.project = a.project and me.name = a.jobset and a.isCurrent = 1)"
+              , nrfailed => "(select count(*) from Builds as a where a.finished = 1 and me.project = a.project and me.name = a.jobset and buildstatus <> 0 and a.isCurrent = 1)"
+              , nrsucceeded => "(select count(*) from Builds as a where a.finished = 1 and me.project = a.project and me.name = a.jobset and buildstatus = 0 and a.isCurrent = 1)"
+              , nrtotal => "(select count(*) from Builds as a where me.project = a.project and me.name = a.jobset and a.isCurrent = 1)"
+              }, "enabled", "hidden", "name", "description", "lastcheckedtime" ]
+            }),
+        }
+    );
+}
+
+sub project_PUT {
+    my ($self, $c) = @_;
+
+    requireProjectOwner($c, $c->stash->{project});
 
     txn_do($c->model('DB')->schema, sub {
         updateProject($c, $c->stash->{project});
     });
 
-    $c->res->redirect($c->uri_for($self->action_for("view"), [$c->stash->{project}->name]));
+    if ($c->req->looks_like_browser) {
+      $c->res->redirect($c->uri_for($self->action_for("view"), [$c->stash->{project}->name]));
+    } else {
+        $self->status_ok(
+            $c,
+            entity => $c->stash->{project}
+        );
+    }
+}
+
+sub project_DELETE {
+    my ($self, $c) = @_;
+
+    requireProjectOwner($c, $c->stash->{project});
+
+    $c->stash->{project}->delete;
+
+    if ($c->req->looks_like_browser) {
+        $c->res->redirect($c->uri_for("/"));
+    } else {
+        $self->status_no_content($c);
+    }
+}
+
+sub edit :Chained('project') :PathPart :Args(0) :ActionClass('REST') { }
+
+sub edit_GET {
+    my ($self, $c) = @_;
+
+    requireProjectOwner($c, $c->stash->{project});
+
+    $c->stash->{template} = 'edit-project.tt';
+    $c->stash->{edit} = 1;
 }
 
 
 sub requireMayCreateProjects {
-    my ($c) = @_;
+    my ($self, $c) = @_;
 
     requireLogin($c) if !$c->user_exists;
 
-    error($c, "Only administrators or authorised users can perform this operation.")
-        unless $c->check_user_roles('admin') || $c->check_user_roles('create-projects');
+    unless ($c->check_user_roles('admin') || $c->check_user_roles('create-projects')) {
+        $self->status_forbidden(
+            $c,
+            message => "Only administrators or authorised users can perform this operation."
+        );
+        $c->detach;
+    }
 }
 
 
-sub create : Path('/create-project') {
+sub create :Path('/create-project') :ActionClass('REST') { }
+
+sub create_GET {
     my ($self, $c) = @_;
 
-    requireMayCreateProjects($c);
+    requireMayCreateProjects($self, $c);
 
     $c->stash->{template} = 'edit-project.tt';
     $c->stash->{create} = 1;
     $c->stash->{edit} = 1;
-}
-
-
-sub create_submit : Path('/create-project/submit') {
-    my ($self, $c) = @_;
-
-    requireMayCreateProjects($c);
-
-    my $projectName = trim $c->request->params->{name};
-
-    error($c, "Invalid project name: ‘$projectName’") if $projectName !~ /^$projectNameRE$/;
-
-    txn_do($c->model('DB')->schema, sub {
-        # Note: $projectName is validated in updateProject,
-        # which will abort the transaction if the name isn't
-        # valid.  Idem for the owner.
-        my $owner = $c->check_user_roles('admin')
-            ? trim $c->request->params->{owner} : $c->user->username;
-        my $project = $c->model('DB::Projects')->create(
-            {name => $projectName, displayname => "", owner => $owner});
-        updateProject($c, $project);
-    });
-
-    $c->res->redirect($c->uri_for($self->action_for("view"), [$projectName]));
-}
-
-
-sub create_jobset : Chained('project') PathPart('create-jobset') Args(0) {
-    my ($self, $c) = @_;
-
-    requireProjectOwner($c, $c->stash->{project});
-
-    $c->stash->{template} = 'edit-jobset.tt';
-    $c->stash->{create} = 1;
-    $c->stash->{edit} = 1;
-}
-
-
-sub create_jobset_submit : Chained('project') PathPart('create-jobset/submit') Args(0) {
-    my ($self, $c) = @_;
-
-    requireProjectOwner($c, $c->stash->{project});
-
-    my $jobsetName = trim $c->request->params->{name};
-    my $exprType =
-        $c->request->params->{"nixexprpath"} =~ /.scm$/ ? "guile" : "nix";
-
-    error($c, "Invalid jobset name: ‘$jobsetName’") if $jobsetName !~ /^$jobsetNameRE$/;
-
-    txn_do($c->model('DB')->schema, sub {
-        # Note: $jobsetName is validated in updateProject, which will
-        # abort the transaction if the name isn't valid.
-        my $jobset = $c->stash->{project}->jobsets->create(
-            {name => $jobsetName, nixexprinput => "", nixexprpath => "", emailoverride => ""});
-        Hydra::Controller::Jobset::updateJobset($c, $jobset);
-    });
-
-    $c->res->redirect($c->uri_for($c->controller('Jobset')->action_for("index"),
-        [$c->stash->{project}->name, $jobsetName]));
 }
 
 
@@ -177,67 +211,6 @@ sub get_builds : Chained('project') PathPart('') CaptureArgs(0) {
     $c->stash->{latestSucceeded} = $c->model('DB')->resultset('LatestSucceededForProject')
         ->search({}, {bind => [$c->stash->{project}->name]});
     $c->stash->{channelBaseName} = $c->stash->{project}->name;
-}
-
-
-sub create_view_submit : Chained('project') PathPart('create-view/submit') Args(0) {
-    my ($self, $c) = @_;
-
-    requireProjectOwner($c, $c->stash->{project});
-
-    my $viewName = $c->request->params->{name};
-
-    my $view;
-    txn_do($c->model('DB')->schema, sub {
-        # Note: $viewName is validated in updateView, which will abort
-        # the transaction if the name isn't valid.
-        $view = $c->stash->{project}->views->create({name => $viewName});
-        Hydra::Controller::View::updateView($c, $view);
-    });
-
-    $c->res->redirect($c->uri_for($c->controller('View')->action_for('view_view'),
-        [$c->stash->{project}->name, $view->name]));
-}
-
-
-sub create_view : Chained('project') PathPart('create-view') Args(0) {
-    my ($self, $c) = @_;
-
-    requireProjectOwner($c, $c->stash->{project});
-
-    $c->stash->{template} = 'edit-view.tt';
-    $c->stash->{create} = 1;
-}
-
-
-sub create_release : Chained('project') PathPart('create-release') Args(0) {
-    my ($self, $c) = @_;
-    requireProjectOwner($c, $c->stash->{project});
-    $c->stash->{template} = 'edit-release.tt';
-    $c->stash->{create} = 1;
-}
-
-
-sub create_release_submit : Chained('project') PathPart('create-release/submit') Args(0) {
-    my ($self, $c) = @_;
-
-    requireProjectOwner($c, $c->stash->{project});
-
-    my $releaseName = $c->request->params->{name};
-
-    my $release;
-    txn_do($c->model('DB')->schema, sub {
-        # Note: $releaseName is validated in updateRelease, which will
-        # abort the transaction if the name isn't valid.
-        $release = $c->stash->{project}->releases->create(
-            { name => $releaseName
-            , timestamp => time
-            });
-        Hydra::Controller::Release::updateRelease($c, $release);
-    });
-
-    $c->res->redirect($c->uri_for($c->controller('Release')->action_for('view'),
-        [$c->stash->{project}->name, $release->name]));
 }
 
 

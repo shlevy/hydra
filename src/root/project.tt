@@ -1,4 +1,4 @@
-[% WRAPPER layout.tt title="Project $project.name" %]
+[% WRAPPER layout.tt title="Project $resource.project.name" %]
 [% PROCESS common.tt %]
 
 <ul class="nav nav-tabs">
@@ -11,7 +11,7 @@
 <div class="tab-content">
 
   <div id="tabs-project" class="tab-pane active">
-    [% IF project.jobsets.size > 0 %]
+    [% IF resource.jobsets.size > 0 %]
       <p>This project has the following jobsets:</p>
 
       <table class="tablesorter table table-striped table-condensed clickable-rows">
@@ -25,7 +25,7 @@
           </tr>
         </thead>
         <tbody>
-          [% FOREACH j IN jobsets %]
+          [% FOREACH j IN resource.jobsets %]
             [% successrate = 0 %]
             <tr>
               <td>
@@ -39,7 +39,7 @@
                   <img src="/static/images/error_16.png" alt="All Failed" />
                 [% END %]
               </td>
-              <td><span class="[% IF !j.enabled %]disabled-jobset[% END %] [%+ IF j.hidden %]hidden-jobset[% END %]">[% INCLUDE renderJobsetName project=project.name jobset=j.name inRow=1 %]</span></td>
+              <td><span class="[% IF !j.enabled %]disabled-jobset[% END %] [%+ IF j.hidden %]hidden-jobset[% END %]">[% INCLUDE renderJobsetName project=resource.project.name jobset=j.name inRow=1 %]</span></td>
               <td>[% HTML.escape(j.description) %]</td>
               <td>[% INCLUDE renderDateTime timestamp = j.lastcheckedtime %]</td>
               [% IF j.get_column('nrtotal') > 0 %]
@@ -78,21 +78,21 @@
   </div>
 
   <div id="tabs-settings" class="tab-pane">
-    <a class="btn pull-right" href="[% c.uri_for('/project' project.name "edit") %]"><i class="icon-edit"></i> Edit</a>
+    <a class="btn pull-right" href="[% c.uri_for('/project' resource.project.name "edit") %]"><i class="icon-edit"></i> Edit</a>
     <table class="info-table">
       <tr>
         <th>Display name:</th>
-        <td>[% HTML.escape(project.displayname) %]</td>
+        <td>[% HTML.escape(resource.project.displayname) %]</td>
       </tr>
       <tr>
         <th>Description:</th>
-        <td>[% HTML.escape(project.description) %]</td>
+        <td>[% HTML.escape(resource.project.description) %]</td>
       </tr>
       <tr>
         <th>Homepage:</th>
         <td>
-          [% IF project.homepage %]
-            <a [% HTML.attributes(href => project.homepage) %]>[% HTML.escape(project.homepage) %]</a>
+          [% IF resource.project.homepage %]
+            <a [% HTML.attributes(href => resource.project.homepage) %]>[% HTML.escape(resource.project.homepage) %]</a>
           [% ELSE %]
             <em>(not specified)</em>
           [% END %]
@@ -100,18 +100,18 @@
       </tr>
       <tr>
         <th>Owner:</th>
-        <td><tt>[% HTML.escape(project.owner.username) %]</tt></td>
+        <td><tt>[% HTML.escape(resource.project.owner.username) %]</tt></td>
       </tr>
       <tr>
         <th>Enabled:</th>
-        <td>[% project.enabled ? "Yes" : "No" %]</td>
+        <td>[% resource.project.enabled ? "Yes" : "No" %]</td>
       </tr>
     </table>
   </div>
 
   <div id="tabs-releases" class="tab-pane">
 
-    [% IF releases.size == 0 %]
+    [% IF resource.project.releases.size == 0 %]
 
     <p><em>This project has no releases yet.</em></p>
 
@@ -127,9 +127,9 @@
         </tr>
       </thead>
       <tbody>
-        [% FOREACH release IN releases %]
+        [% FOREACH release IN resource.project.releases %]
           <tr>
-            <td><a class="row-link" href="[% c.uri_for('/release' project.name release.name) %]"><tt>[% release.name %]</tt></a></td>
+            <td><a class="row-link" href="[% c.uri_for('/release' resource.project.name release.name) %]"><tt>[% release.name %]</tt></a></td>
             <td>[% INCLUDE renderDateTime timestamp = release.timestamp %]</td>
           </tr>
         [% END %]
@@ -139,7 +139,7 @@
     [% END %]
 
     [% IF c.user_exists %]
-    <p><a class="btn" href="[% c.uri_for('/project' project.name 'create-release') %]">
+    <p><a class="btn" href="[% c.uri_for('/project' resource.project.name 'create-release') %]">
       <i class="icon-plus"></i> Create a release
     </a></p>
     [% END %]
@@ -148,26 +148,26 @@
 
   <div id="tabs-views" class="tab-pane">
 
-    [% IF views.size > 0 %]
+    [% IF resource.project.views.size > 0 %]
 
-      <p>Project <tt>[% project.name %]</tt> has the following views:</p>
+      <p>Project <tt>[% resource.project.name %]</tt> has the following views:</p>
 
       <ul>
-        [% FOREACH view IN views %]
+        [% FOREACH view IN resource.project.views %]
           <li>
-            <a href="[% c.uri_for('/view' project.name view.name) %]"><tt>[% view.name %]</tt></a>
+            <a href="[% c.uri_for('/view' resource.project.name view.name) %]"><tt>[% view.name %]</tt></a>
           </li>
         [% END %]
       </ul>
 
     [% ELSE %]
 
-      <p>Project <tt>[% project.name %]</tt> has no views.</p>
+      <p>Project <tt>[% resource.project.name %]</tt> has no views.</p>
 
     [% END %]
 
     <p>
-      <a class="btn" href="[% c.uri_for('/project' project.name 'create-view') %]"><i class="icon-plus"></i> Create a new view</a>
+      <a class="btn" href="[% c.uri_for('/project' resource.project.name 'create-view') %]"><i class="icon-plus"></i> Create a new view</a>
     </p>
 
   </div>

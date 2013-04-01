@@ -132,8 +132,10 @@ sub requireProjectOwner {
 
     requireLogin($c) if !$c->user_exists;
 
-    error($c, "Only the project members or administrators can perform this operation.")
-        unless isProjectOwner($c, $project);
+    unless (isProjectOwner($c, $project)) {
+        $c->response->status("403");
+        error($c, "Only the project members or administrators can perform this operation.");
+    }
 }
 
 
