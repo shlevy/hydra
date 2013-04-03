@@ -81,7 +81,7 @@ sub jobsetChain :Chained('projectChain') :PathPart('') :CaptureArgs(1) {
 
     my $project = $c->stash->{project};
 
-    $c->stash->{jobset_} = $project->jobsets->find(
+    $c->stash->{jobset_} = $project->jobsets->search(
         {"me.name" => $jobsetName},
         {columns => [
           'me.name'
