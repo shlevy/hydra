@@ -155,6 +155,8 @@ sub jobset_PUT {
 
 
 sub jobset_DELETE {
+    my ($self, $c) = @_;
+
     $c->stash->{jobset}->delete;
     if ($c->request->looks_like_browser) {
         $c->res->redirect($c->uri_for($c->controller('Project')->action_for("project"), [$c->stash->{project}->name]));
