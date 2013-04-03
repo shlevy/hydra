@@ -82,7 +82,7 @@ sub jobsetChain :Chained('projectChain') :PathPart('') :CaptureArgs(1) {
     my $project = $c->stash->{project};
 
     $c->stash->{jobset_} = $project->jobsets->search(
-        {name => $jobsetName},
+        {"me.name" => $jobsetName},
         {columns => [
           'me.name'
         , 'me.errormsg'
