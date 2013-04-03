@@ -1,15 +1,15 @@
 [% PROCESS common.tt %]
 
-<p>This jobset currently contains the following [% activeJobs.size %] jobs:
+<p>This jobset currently contains the following [% resource.activeJobs.size %] jobs:
   <blockquote>
-    [% IF activeJobs.size == 0 %]<em>(none)</em>[% END %]
-    [% FOREACH j IN activeJobs %][% INCLUDE renderJobName project=project.name jobset=jobset.name job=j %]<br/>[% END %]
+    [% IF resource.activeJobs.size == 0 %]<em>(none)</em>[% END %]
+    [% FOREACH j IN resource.activeJobs %][% INCLUDE renderJobName project=project.name jobset=jobset.name job=j %]<br/>[% END %]
   </blockquote>
 </p>
 
-<p>This jobset used to contain the following [% inactiveJobs.size %] jobs:
+<p>This jobset used to contain the following [% resource.inactiveJobs.size %] jobs:
   <blockquote>
-    [% IF inactiveJobs.size == 0 %]<em>(none)</em>[% END %]
-    [% FOREACH j IN inactiveJobs %][% INCLUDE renderJobName project=project.name jobset=jobset.name job=j %]<br/>[% END %]
+    [% IF resource.inactiveJobs.size == 0 %]<em>(none)</em>[% END %]
+    [% FOREACH j IN resource.inactiveJobs %][% INCLUDE renderJobName project=project.name jobset=jobset.name job=j %]<br/>[% END %]
   </blockquote>
 </p>

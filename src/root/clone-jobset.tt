@@ -3,19 +3,32 @@
 [% USE HTML %]
 [% edit=1 %]
 
-<form class="form-horizontal" action="[% c.uri_for('/jobset' jobset.project.name jobset.name 'clone' 'submit') %]" method="post">
+<form class="form-horizontal" action="[% c.uri_for('/jobset' jobset.project.name) %]" method="post">
 
   <fieldset>
     <div class="control-group">
       <label class="control-label">New name</label>
       <div class="controls">
-        <input type="text" class="span3" name="newjobset" value=""></input>
+        <input type="text" class="span3" name="name" value=""></input>
       </div>
     </div>
 
     <div class="form-actions">
       <input type="submit" value="Submit" class="btn btn-primary" />
     </div>
+    <input type="hidden" name="nixexprpath" value="[% jobset.nixexprpath %]" />
+    <input type="hidden" name="nixexprinput" value="[% jobset.nixexprinput %]" />
+    <input type="hidden" name="description" value="[% jobset.description %]" />
+    [% IF jobset.enableemail %]
+      <input type="hidden" name="enableemail" value="1" />
+    [% END %]
+    <input type="hidden" name="emailoverride" value="[% jobset.emailoverride %]" />
+    [% index = 0 %]
+    [% FOREACH input IN jobset.jobsetinputs %]
+      <input type="hidden" name="input-[% index %]-name" value="input.name" />
+      <input type="hidden" name="input-[% index %]-type" value="input.type" />
+      [% index = index + 1 %]
+    [% END %]
 
   </fieldset>
 

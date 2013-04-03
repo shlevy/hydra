@@ -39,8 +39,8 @@ sub projects_POST {
         } else {
             $self->status_created(
                 $c,
-                location => $uri
-                entity => $project
+                location => $uri,
+                entity => { name => $projectName, uri => $uri, type => "project" }
             );
         }
 }
@@ -76,7 +76,7 @@ sub projectChain :Chained('/') :PathPart('project') :CaptureArgs(1) {
 }
 
 
-sub project :Chained('/project') :PathPart('') :ActionClass('REST::ForBrowsers') { }
+sub project :Chained('projectChain') :PathPart('') :ActionClass('REST::ForBrowsers') { }
 
 sub project_GET {
     my ($self, $c, $projectName) = @_;
@@ -132,7 +132,7 @@ sub project_DELETE {
     }
 }
 
-sub edit :Chained('project') :PathPart :Args(0) :ActionClass('REST') { }
+sub edit :Chained('projectChain') :PathPart :Args(0) :ActionClass('REST') { }
 
 sub edit_GET {
     my ($self, $c) = @_;

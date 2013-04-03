@@ -1,4 +1,4 @@
-[% WRAPPER layout.tt title="Jobset $project.name:$jobset.name" %]
+[% WRAPPER layout.tt title="Jobset $project.name:$resource.jobset.name" %]
 [% PROCESS common.tt %]
 
 
@@ -32,7 +32,7 @@
       <tr><th>Input name</th><th>Type</th><th>Values</th></tr>
     </thead>
     <tbody class="inputs">
-      [% FOREACH input IN jobset.jobsetinputs %]
+      [% FOREACH input IN resource.jobset.jobsetinputs %]
         [% INCLUDE renderJobsetInput input=input baseName="input-$input.name" %]
       [% END %]
     </tbody>
@@ -42,7 +42,7 @@
 
 <ul class="nav nav-tabs">
   <li class="active"><a href="#tabs-evaluations" data-toggle="tab">Evaluations</a></li>
-  [% IF jobset.errormsg %]
+  [% IF resource.jobset.errormsg %]
     <li><a href="#tabs-errors" data-toggle="tab"><img src="/static/images/error_16.png" /> Evaluation errors</a></li>
   [% END %]
   <li><a href="#tabs-status" data-toggle="tab">Job status</a></li>
@@ -58,8 +58,8 @@
       <tr>
         <th>Last checked:</th>
         <td>
-          [% IF jobset.lastcheckedtime %]
-            [% INCLUDE renderDateTime timestamp = jobset.lastcheckedtime %], [% IF jobset.errormsg %]<em class="text-warning">with errors!</em>[% ELSE %]<em>no errors</em>[% END %]
+          [% IF resource.jobset.lastcheckedtime %]
+            [% INCLUDE renderDateTime timestamp = resource.jobset.lastcheckedtime %], [% IF resource.jobset.errormsg %]<em class="text-warning">with errors!</em>[% ELSE %]<em>no errors</em>[% END %]
           [% ELSE %]
             <em>never</em>
           [% END %]
@@ -75,69 +75,69 @@
           [% END %]
         </td>
       </tr>
-      [% IF jobset.triggertime %]
+      [% IF resource.jobset.triggertime %]
       <tr>
         <th>Evaluation pending since:</th>
-        <td>[% INCLUDE renderDateTime timestamp = jobset.triggertime %]</td>
+        <td>[% INCLUDE renderDateTime timestamp = resource.jobset.triggertime %]</td>
       </tr>
       [% END %]
     </table>
 
     <br/>
 
-    [% IF evals.size() > 0 %]
-      [% INCLUDE renderEvals linkToAll=c.uri_for(c.controller('Jobset').action_for('evals'), [project.name, jobset.name]) %]
+    [% IF resource.evals.size() > 0 %]
+      [% INCLUDE renderEvals linkToAll=c.uri_for(c.controller('Jobset').action_for('evals'), [project.name, resource.jobset.name]) %]
     [% END %]
 
   </div>
 
-  [% INCLUDE makeLazyTab tabName="tabs-status" uri=c.uri_for('/jobset' project.name jobset.name "status-tab") %]
+  [% INCLUDE makeLazyTab tabName="tabs-status" uri=c.uri_for('/jobset' project.name resource.jobset.name "status") %]
 
-  [% IF jobset.errormsg %]
+  [% IF resource.jobset.errormsg %]
     <div id="tabs-errors" class="tab-pane">
-      <p>Errors occurred at [% INCLUDE renderDateTime timestamp=jobset.errortime %].</p>
-      <pre class="alert alert-error">[% HTML.escape(jobset.errormsg) %]</pre>
+      <p>Errors occurred at [% INCLUDE renderDateTime timestamp=resource.jobset.errortime %].</p>
+      <pre class="alert alert-error">[% HTML.escape(resource.jobset.errormsg) %]</pre>
     </div>
   [% END %]
 
   <div id="tabs-setup" class="tab-pane">
 
-    <a class="btn pull-right" href="[% c.uri_for('/jobset' project.name jobset.name "edit") %]"><i class="icon-edit"></i> Edit</a>
+    <a class="btn pull-right" href="[% c.uri_for('/jobset' project.name resource.jobset.name "edit") %]"><i class="icon-edit"></i> Edit</a>
 
     <table class="info-table">
       <tr>
         <th>Description:</th>
-        <td>[% HTML.escape(jobset.description) %]</td>
+        <td>[% HTML.escape(resource.jobset.description) %]</td>
       </tr>
       <tr>
         <th>Nix expression:</th>
         <td>
-          <tt>[% HTML.escape(jobset.nixexprpath) %]</tt> in input
-          <tt>[% HTML.escape(jobset.nixexprinput) %]</tt>
+          <tt>[% HTML.escape(resource.jobset.nixexprpath) %]</tt> in input
+          <tt>[% HTML.escape(resource.jobset.nixexprinput) %]</tt>
         </td>
       </tr>
       <tr>
         <th>Enabled:</th>
-        <td>[% jobset.enabled ? "Yes" : "No" %]</td>
+        <td>[% resource.jobset.enabled ? "Yes" : "No" %]</td>
       </tr>
       <tr>
         <th>Enable email notification:</th>
-        <td>[% jobset.enableemail ? "Yes" : "No" %]</td>
+        <td>[% resource.jobset.enableemail ? "Yes" : "No" %]</td>
       </tr>
       <tr>
         <th>Email override:</th>
-        <td>[% HTML.escape(jobset.emailoverride) %]</td>
+        <td>[% HTML.escape(resource.jobset.emailoverride) %]</td>
       </tr>
       <tr>
         <th>Number of builds to keep:</th>
-        <td>[% jobset.keepnr %]</td>
+        <td>[% resource.jobset.keepnr %]</td>
       </tr>
     </table>
 
     [% INCLUDE renderJobsetInputs %]
   </div>
 
-  [% INCLUDE makeLazyTab tabName="tabs-jobs" uri=c.uri_for('/jobset' project.name jobset.name "jobs-tab") %]
+  [% INCLUDE makeLazyTab tabName="tabs-jobs" uri=c.uri_for('/jobset' project.name resource.jobset.name "jobs") %]
 
 </div>
 

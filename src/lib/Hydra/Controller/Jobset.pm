@@ -7,7 +7,7 @@ use Hydra::Helper::Nix;
 use Hydra::Helper::CatalystUtils;
 
 
-sub create_jobset : Chained('project') PathPart('create-jobset') Args(0) {
+sub create_jobset :Chained('/project') :PathPart('create-jobset') :Args(0) {
     my ($self, $c) = @_;
 
     requireProjectOwner($c, $c->stash->{project});
@@ -18,7 +18,26 @@ sub create_jobset : Chained('project') PathPart('create-jobset') Args(0) {
 }
 
 
-sub create_jobset_submit : Chained('project') PathPart('create-jobset/submit') Args(0) {
+sub projectChain :Chained('/') :PathPart('jobset') :CaptureArgs(1) {
+    my ($self, $c, $projectName) = @_;
+
+    my $project = $c->model('DB::Projects')->find($projectName);
+
+    unless ($project) {
+        $self->status_not_found(
+            $c,
+            message => "Project $projectName doesn't exist."
+        );
+        $c->detach;
+    }
+
+    $c->stash->{project} = $project;
+}
+
+
+sub project :Chained('projectChain') :PathPart('') :Args(0) :ActionClass('REST::ForBrowsers') { }
+
+sub project_POST {
     my ($self, $c) = @_;
 
     requireProjectOwner($c, $c->stash->{project});
@@ -27,79 +46,166 @@ sub create_jobset_submit : Chained('project') PathPart('create-jobset/submit') A
     my $exprType =
         $c->request->params->{"nixexprpath"} =~ /.scm$/ ? "guile" : "nix";
 
-    error($c, "Invalid jobset name: ‘$jobsetName’") if $jobsetName !~ /^$jobsetNameRE$/;
+    if ($jobsetName !~ /^$jobsetNameRE$/) {
+        $self->status_bad_request(
+            $c,
+            message => "Invalid jobset name: ‘$jobsetName’" 
+        );
+        $c->detach;
+    }
 
     txn_do($c->model('DB')->schema, sub {
         # Note: $jobsetName is validated in updateProject, which will
         # abort the transaction if the name isn't valid.
         my $jobset = $c->stash->{project}->jobsets->create(
             {name => $jobsetName, nixexprinput => "", nixexprpath => "", emailoverride => ""});
-        Hydra::Controller::Jobset::updateJobset($c, $jobset);
+        updateJobset($c, $jobset);
     });
 
-    $c->res->redirect($c->uri_for($c->controller('Jobset')->action_for("index"),
-        [$c->stash->{project}->name, $jobsetName]));
+    my $uri = $c->uri_for("jobset",
+            [$c->stash->{project}->name, $jobsetName]);
+    if ($c->req->looks_like_browser) {
+        $c->res->redirect($uri);
+    } else {
+        $self->status_created(
+            $c,
+            location => $uri,
+            entity => { name => $jobsetName, uri => $uri, type => "jobset" }
+        );
+    }
 }
 
 
-sub jobset : Chained('/') PathPart('jobset') CaptureArgs(2) {
-    my ($self, $c, $projectName, $jobsetName) = @_;
+sub jobsetChain :Chained('projectChain') :PathPart('') :CaptureArgs(1) {
+    my ($self, $c, $jobsetName) = @_;
 
-    my $project = $c->model('DB::Projects')->find($projectName)
-        or notFound($c, "Project $projectName doesn't exist.");
+    my $project = $c->stash->{project};
 
-    $c->stash->{project} = $project;
+    $c->stash->{jobset_} = $project->jobsets->search(
+        {name => $jobsetName},
+        {columns => [
+          'me.name'
+        , 'me.errormsg'
+        , 'me.description'
+        , 'me.nixexprpath'
+        , 'me.nixexprinput'
+        , 'me.lastcheckedtime'
+        , 'me.triggertime'
+        , 'me.enabled'
+        , 'me.enableemail'
+        , 'me.emailoverride'
+        , 'me.keepnr'
+        , 'jobsetinputs.name'
+        , 'jobsetinputs.type'
+        , {'jobsetinputs.jobsetinputalts.value' => 'jobsetinputalts.value'}
+        ], join => {jobsetinputs => ['jobsetinputalts']}}
+    );
 
-    $c->stash->{jobset_} = $project->jobsets->search({name => $jobsetName});
-    $c->stash->{jobset} = $c->stash->{jobset_}->single
-        or notFound($c, "Jobset $jobsetName doesn't exist.");
+    $c->stash->{jobset} = $c->stash->{jobset_}->single;
+
+    unless ($c->stash->{jobset}) {
+        $self->status_not_found(
+            $c,
+            message => "Jobset $jobsetName doesn't exist."
+        );
+        $c->detach;
+    }
 }
 
 
-sub index : Chained('jobset') PathPart('') Args(0) {
+sub jobset :Chained('jobsetChain') :PathPart('') :Args(0) :ActionClass("REST::ForBrowsers") { }
+
+sub jobset_GET {
     my ($self, $c) = @_;
 
     $c->stash->{template} = 'jobset.tt';
 
-    my $projectName = $c->stash->{project}->name;
-    my $jobsetName = $c->stash->{jobset}->name;
+    ($c->stash->{latestEval}) = $c->stash->{jobset}->jobsetevals->search({}, { limit => 1, order_by => ["id desc"], columns => [ 'timestamp' ] });
 
-    $c->stash->{evals} = getEvals($self, $c, scalar $c->stash->{jobset}->jobsetevals, 0, 10);
-
-    ($c->stash->{latestEval}) = $c->stash->{jobset}->jobsetevals->search({}, { limit => 1, order_by => ["id desc"] });
+    $self->status_ok(
+        $c,
+        entity => {
+          jobset => $c->stash->{jobset}
+          #!!! Should be part of jobset
+        , evals => getEvals($self, $c, scalar $c->stash->{jobset}->jobsetevals, 0, 10)
+        }
+    );
 }
 
 
-sub jobs_tab : Chained('jobset') PathPart('jobs-tab') Args(0) {
+sub jobset_PUT {
+    my ($self, $c) = @_;
+
+    requireProjectOwner($c, $c->stash->{project});
+
+    txn_do($c->model('DB')->schema, sub {
+        updateJobset($c, $c->stash->{jobset});
+    });
+
+    if ($c->request->looks_like_browser) {
+        $c->res->redirect($c->uri_for($self->action_for("jobset"),
+            [$c->stash->{project}->name, $c->stash->{jobset}->name]));
+    } else {
+        $self->status_ok(
+            $c,
+            entity => $c->stash->{jobset}
+        );
+    }
+}
+
+
+sub jobset_DELETE {
+    $c->stash->{jobset}->delete;
+    if ($c->request->looks_like_browser) {
+        $c->res->redirect($c->uri_for($c->controller('Project')->action_for("project"), [$c->stash->{project}->name]));
+    } else {
+        $self->status_no_content($c);
+    }
+}
+
+
+sub jobs :Chained('jobsetChain') :PathPart :Args(0) :ActionClass("REST") { }
+
+sub jobs_GET {
     my ($self, $c) = @_;
     $c->stash->{template} = 'jobset-jobs-tab.tt';
 
-    $c->stash->{activeJobs} = [];
-    $c->stash->{inactiveJobs} = [];
+    my @activeJobs = ();
+    my @inactiveJobs = ();
 
     (my $latestEval) = $c->stash->{jobset}->jobsetevals->search(
         { hasnewbuilds => 1}, { limit => 1, order_by => ["id desc"] });
 
-    my %activeJobs;
+    my %seenActiveJobs;
     if (defined $latestEval) {
         foreach my $build ($latestEval->builds->search({}, { order_by => ["job"], select => ["job"] })) {
             my $job = $build->get_column("job");
-            if (!defined $activeJobs{$job}) {
-                $activeJobs{$job} = 1;
-                push @{$c->stash->{activeJobs}}, $job;
+            if (!defined $seenActiveJobs{$job}) {
+                $seenActiveJobs{$job} = 1;
+                push @activeJobs, $job;
             }
         }
     }
 
     foreach my $job ($c->stash->{jobset}->jobs->search({}, { order_by => ["name"] })) {
-        if (!defined $activeJobs{$job->name}) {
-            push @{$c->stash->{inactiveJobs}}, $job->name;
+        if (!defined $seenActiveJobs{$job->name}) {
+            push @inactiveJobs, $job->name;
         }
     }
+
+    $self->status_ok(
+        $c,
+        entity => {
+          activeJobs => \@activeJobs,
+          inactiveJobs => \@inactiveJobs,
+        }
+    );
 }
 
 
-sub status_tab : Chained('jobset') PathPart('status-tab') Args(0) {
+sub status :Chained('jobsetChain') :PathPart :Args(0) :ActionClass("REST") { }
+
+sub status_GET {
     my ($self, $c) = @_;
     $c->stash->{template} = 'jobset-status-tab.tt';
 
@@ -124,19 +230,22 @@ sub status_tab : Chained('jobset') PathPart('status-tab') Args(0) {
         push(@as, "$system-build");
     }
 
-    $c->stash->{activeJobsStatus} = [
-        $c->model('DB')->resultset('ActiveJobsForJobset')->search(
+    $self->status_ok(
+        $c,
+        entity => [ $c->model('DB')->resultset('ActiveJobsForJobset')->search(
             {},
             { bind => [$c->stash->{project}->name, $c->stash->{jobset}->name]
             , select => \@select
             , as => \@as
             , order_by => ["job"]
-            }) ];
+            }
+        ) ]
+    );
 }
 
 
 # Hydra::Base::Controller::ListBuilds needs this.
-sub get_builds : Chained('jobset') PathPart('') CaptureArgs(0) {
+sub get_builds :Chained('jobsetChain') :PathPart('') :CaptureArgs(0) {
     my ($self, $c) = @_;
     $c->stash->{allBuilds} = $c->stash->{jobset}->builds;
     $c->stash->{jobStatus} = $c->model('DB')->resultset('JobStatusForJobset')
@@ -150,33 +259,15 @@ sub get_builds : Chained('jobset') PathPart('') CaptureArgs(0) {
 }
 
 
-sub edit : Chained('jobset') PathPart Args(0) {
+sub edit :Chained('jobsetChain') :PathPart :Args(0) :ActionClass("REST") {
+
+sub edit_GET {
     my ($self, $c) = @_;
 
     requireProjectOwner($c, $c->stash->{project});
 
     $c->stash->{template} = 'edit-jobset.tt';
     $c->stash->{edit} = 1;
-}
-
-
-sub submit : Chained('jobset') PathPart Args(0) {
-    my ($self, $c) = @_;
-
-    requireProjectOwner($c, $c->stash->{project});
-    requirePost($c);
-
-    if (($c->request->params->{submit} // "") eq "delete") {
-        $c->stash->{jobset}->delete;
-        return $c->res->redirect($c->uri_for($c->controller('Project')->action_for("view"), [$c->stash->{project}->name]));
-    }
-
-    txn_do($c->model('DB')->schema, sub {
-        updateJobset($c, $c->stash->{jobset});
-    });
-
-    $c->res->redirect($c->uri_for($self->action_for("index"),
-        [$c->stash->{project}->name, $c->stash->{jobset}->name]));
 }
 
 
@@ -290,7 +381,9 @@ sub updateJobset {
 }
 
 
-sub clone : Chained('jobset') PathPart('clone') Args(0) {
+sub clone :Chained('jobsetChain') :PathPart :Args(0) :ActionClass("REST") { }
+
+sub clone_GET {
     my ($self, $c) = @_;
 
     my $jobset = $c->stash->{jobset};
@@ -300,41 +393,9 @@ sub clone : Chained('jobset') PathPart('clone') Args(0) {
 }
 
 
-sub clone_submit : Chained('jobset') PathPart('clone/submit') Args(0) {
-    my ($self, $c) = @_;
+sub evals :Chained('jobsetChain') :PathPart :Args(0) :ActionClass("REST") { }
 
-    my $jobset = $c->stash->{jobset};
-    requireProjectOwner($c, $jobset->project);
-    requirePost($c);
-
-    my $newJobsetName = trim $c->request->params->{"newjobset"};
-    error($c, "Invalid jobset name: $newJobsetName") unless $newJobsetName =~ /^[[:alpha:]][\w\-]*$/;
-
-    my $newJobset;
-    txn_do($c->model('DB')->schema, sub {
-        $newJobset = $jobset->project->jobsets->create(
-            { name => $newJobsetName
-            , description => $jobset->description
-            , nixexprpath => $jobset->nixexprpath
-            , nixexprinput => $jobset->nixexprinput
-            , enabled => 0
-            , enableemail => $jobset->enableemail
-            , emailoverride => $jobset->emailoverride || ""
-            });
-
-        foreach my $input ($jobset->jobsetinputs) {
-            my $newinput = $newJobset->jobsetinputs->create({name => $input->name, type => $input->type});
-            foreach my $inputalt ($input->jobsetinputalts) {
-                $newinput->jobsetinputalts->create({altnr => $inputalt->altnr, value => $inputalt->value});
-            }
-        }
-    });
-
-    $c->res->redirect($c->uri_for($c->controller('Jobset')->action_for("edit"), [$jobset->project->name, $newJobsetName]));
-}
-
-
-sub evals : Chained('jobset') PathPart('evals') Args(0) {
+sub evals_GET {
     my ($self, $c) = @_;
 
     $c->stash->{template} = 'evals.tt';
@@ -345,15 +406,32 @@ sub evals : Chained('jobset') PathPart('evals') Args(0) {
 
     my $evals = $c->stash->{jobset}->jobsetevals;
 
-    $c->stash->{page} = $page;
     $c->stash->{resultsPerPage} = $resultsPerPage;
-    $c->stash->{total} = $evals->search({hasnewbuilds => 1})->count;
-    $c->stash->{evals} = getEvals($self, $c, $evals, ($page - 1) * $resultsPerPage, $resultsPerPage)
+    $c->stash->{page} = $page;
+    my $total = $evals->search({hasnewbuilds => 1})->count;
+    my %entity = (
+        evals => getEvals($self, $c, $evals, ($page - 1) * $resultsPerPage, $resultsPerPage),
+        total => $total,
+        first => "?page=1",
+        last => "?page=" . POSIX::ceil($total/$resultsPerPage)
+    );
+    if ($page > 1) {
+        $entity{previous} = "?page=" . $page - 1;
+    }
+    if ($page < $entity{last}) {
+        $entity{next} = "?page=" . $page + 1;
+    }
+    $self->status_ok(
+        $c,
+        entity => \%entity
+    );
 }
 
 
 # Redirect to the latest finished evaluation of this jobset.
-sub latest_eval : Chained('jobset') PathPart('latest-eval') {
+sub latest_eval :Chained('jobsetChain') :PathPart('latest-eval') :ActionClass("REST") { }
+
+sub latest_eval_GET {
     my ($self, $c, @args) = @_;
     my $eval = getLatestFinishedEval($c, $c->stash->{jobset})
         or notFound($c, "No evaluation found.");
