@@ -43,6 +43,7 @@ sub projects_POST {
                 entity => { name => $projectName, uri => $uri, type => "project" }
             );
         }
+    }
 }
 
 
