@@ -82,6 +82,8 @@ sub project :Chained('projectChain') :PathPart('') :ActionClass('REST::ForBrowse
 sub project_GET {
     my ($self, $c, $projectName) = @_;
 
+    $c->stash->{template} = 'project.tt';
+
     $self->status_ok(
         $c,
         entity => {
