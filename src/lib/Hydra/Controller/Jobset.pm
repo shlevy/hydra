@@ -81,7 +81,7 @@ sub jobsetChain :Chained('projectChain') :PathPart('') :CaptureArgs(1) {
 
     my $project = $c->stash->{project};
 
-    $c->stash->{jobset_} = $project->jobsets->search(
+    $c->stash->{jobset_} = $project->jobsets->find(
         {"me.name" => $jobsetName},
         {columns => [
           'me.name'
@@ -95,6 +95,7 @@ sub jobsetChain :Chained('projectChain') :PathPart('') :CaptureArgs(1) {
         , 'me.enableemail'
         , 'me.emailoverride'
         , 'me.keepnr'
+        , 'me.project'
         , 'jobsetinputs.name'
         , 'jobsetinputs.type'
         , {'jobsetinputs.jobsetinputalts.value' => 'jobsetinputalts.value'}
