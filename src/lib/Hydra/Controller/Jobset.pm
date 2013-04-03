@@ -261,7 +261,7 @@ sub get_builds :Chained('jobsetChain') :PathPart('') :CaptureArgs(0) {
 }
 
 
-sub edit :Chained('jobsetChain') :PathPart :Args(0) :ActionClass("REST") {
+sub edit :Chained('jobsetChain') :PathPart :Args(0) :ActionClass("REST") { }
 
 sub edit_GET {
     my ($self, $c) = @_;
