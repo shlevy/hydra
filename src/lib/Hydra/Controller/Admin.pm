@@ -111,7 +111,6 @@ sub news_POST {
         $self->status_created(
             $c,
             location => $c->req->uri . "/" . $newsItem{id},
-            entity => \%newsItem
             entity => { id => $newsItem{id}, uri => $c->req->uri . "/" . $newsItem{id}, type => "news-item" }
         );
     }

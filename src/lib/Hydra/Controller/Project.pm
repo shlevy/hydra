@@ -89,7 +89,7 @@ sub project_GET {
           #!!! Fixme: Want to JOIN this with the projects query
           jobsets => $c->stash->{project}->jobsets->search(isProjectOwner($c, $c->stash->{project}) ? {} : { hidden => 0 },
             { order_by => "name"
-            , "columns" => [ {
+            , columns => [ {
                 nrscheduled => "(select count(*) from Builds as a where a.finished = 0 and me.project = a.project and me.name = a.jobset and a.isCurrent = 1)"
               , nrfailed => "(select count(*) from Builds as a where a.finished = 1 and me.project = a.project and me.name = a.jobset and buildstatus <> 0 and a.isCurrent = 1)"
               , nrsucceeded => "(select count(*) from Builds as a where a.finished = 1 and me.project = a.project and me.name = a.jobset and buildstatus = 0 and a.isCurrent = 1)"
@@ -110,7 +110,7 @@ sub project_PUT {
     });
 
     if ($c->req->looks_like_browser) {
-      $c->res->redirect($c->uri_for($self->action_for("view"), [$c->stash->{project}->name]));
+      $c->res->redirect($c->uri_for($self->action_for("project"), [$c->stash->{project}->name]));
     } else {
         $self->status_ok(
             $c,
