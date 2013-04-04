@@ -7,7 +7,7 @@ use Hydra::Helper::Nix;
 use Hydra::Helper::CatalystUtils;
 
 
-sub jobChain :Chained('/') :PathPart CaptureArgs(3) {
+sub jobChain :Chained('/') :PathPart('job') CaptureArgs(3) {
     my ($self, $c, $projectName, $jobsetName, $jobName) = @_;
 
     $c->stash->{job_} = $c->model('DB::Jobs')->search({'me.project' => $projectName, 'me.jobset' => $jobsetName, 'me.name' => $jobName}, {columns => ['me.name', 'project.name', 'jobset.name'], join => [ 'project', 'jobset' ]});
