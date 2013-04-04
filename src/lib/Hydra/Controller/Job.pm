@@ -7,18 +7,25 @@ use Hydra::Helper::Nix;
 use Hydra::Helper::CatalystUtils;
 
 
-sub job : Chained('/') PathPart('job') CaptureArgs(3) {
+sub jobChain :Chained('/') :PathPart CaptureArgs(3) {
     my ($self, $c, $projectName, $jobsetName, $jobName) = @_;
 
-    $c->stash->{job_} = $c->model('DB::Jobs')->search({project => $projectName, jobset => $jobsetName, name => $jobName});
-    $c->stash->{job} = $c->stash->{job_}->single
-        or notFound($c, "Job $projectName:$jobsetName:$jobName doesn't exist.");
+    $c->stash->{job_} = $c->model('DB::Jobs')->search({project => $projectName, jobset => $jobsetName, name => $jobName}, {columns => ['me.name', 'project.name', 'jobset.name'], join => [ 'project', 'jobset' ]});
+    $c->stash->{job} = $c->stash->{job_}->single;
+    unless ($c->stash->{job}) {
+        $self->status_not_found(
+            $c,
+            message => "Job $projectName:$jobsetName:$jobName doesn't exist."
+        );
+        $c->detach;
+    }
     $c->stash->{project} = $c->stash->{job}->project;
     $c->stash->{jobset} = $c->stash->{job}->jobset;
 }
 
 
-sub overview : Chained('job') PathPart('') Args(0) {
+sub job :Chained('jobChain') :PathPart('') :Args(0) :ActionClass("REST") { }
+sub job_GET {
     my ($self, $c) = @_;
 
     $c->stash->{template} = 'job.tt';
@@ -38,11 +45,15 @@ sub overview : Chained('job') PathPart('') Args(0) {
         ) ];
 
     $c->stash->{systems} = [$c->stash->{job}->builds->search({iscurrent => 1}, {select => ["system"], distinct => 1})];
+    $self->status_ok(
+        $c,
+        entity => $c->stash->{job}
+    );
 }
 
 
 # Hydra::Base::Controller::ListBuilds needs this.
-sub get_builds : Chained('job') PathPart('') CaptureArgs(0) {
+sub get_builds : Chained('jobChain') PathPart('') CaptureArgs(0) {
     my ($self, $c) = @_;
     $c->stash->{allBuilds} = $c->stash->{job}->builds;
     $c->stash->{jobStatus} = $c->model('DB')->resultset('JobStatusForJob')
