@@ -307,6 +307,11 @@ sub push : Chained('api') PathPart('push') Args(0) {
             , where => \ [ 'exists (select 1 from JobsetInputAlts where project = me.project and jobset = me.name and value = ?)', [ 'value', $r ] ]
             });
     }
+
+    $self->status_ok(
+        $c,
+        entity => { jobsetsTriggered => $c->stash->{jobsetsTriggered} }
+    );
 }
 
 
