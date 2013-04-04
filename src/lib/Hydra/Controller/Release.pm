@@ -7,7 +7,7 @@ use Hydra::Helper::Nix;
 use Hydra::Helper::CatalystUtils;
 
 
-sub create_release : Chained('project') PathPart('create-release') Args(0) {
+sub create_release : Chained('/project/projectChain') PathPart('create-release') Args(0) {
     my ($self, $c) = @_;
     requireProjectOwner($c, $c->stash->{project});
     $c->stash->{template} = 'edit-release.tt';
@@ -15,7 +15,7 @@ sub create_release : Chained('project') PathPart('create-release') Args(0) {
 }
 
 
-sub create_release_submit : Chained('project') PathPart('create-release/submit') Args(0) {
+sub create_release_submit : Chained('/project/projectChain') PathPart('create-release/submit') Args(0) {
     my ($self, $c) = @_;
 
     requireProjectOwner($c, $c->stash->{project});

@@ -7,7 +7,7 @@ use Hydra::Helper::Nix;
 use Hydra::Helper::CatalystUtils;
 
 
-sub create_view_submit : Chained('project') PathPart('create-view/submit') Args(0) {
+sub create_view_submit : Chained('/project/projectChain') PathPart('create-view/submit') Args(0) {
     my ($self, $c) = @_;
 
     requireProjectOwner($c, $c->stash->{project});
@@ -27,7 +27,7 @@ sub create_view_submit : Chained('project') PathPart('create-view/submit') Args(
 }
 
 
-sub create_view : Chained('project') PathPart('create-view') Args(0) {
+sub create_view : Chained('/project/projectChain') PathPart('create-view') Args(0) {
     my ($self, $c) = @_;
 
     requireProjectOwner($c, $c->stash->{project});

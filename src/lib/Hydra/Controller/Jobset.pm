@@ -7,7 +7,7 @@ use Hydra::Helper::Nix;
 use Hydra::Helper::CatalystUtils;
 
 
-sub create_jobset :Chained('/project') :PathPart('create-jobset') :Args(0) {
+sub create_jobset :Chained('/project/projectChain') :PathPart('create-jobset') :Args(0) {
     my ($self, $c) = @_;
 
     requireProjectOwner($c, $c->stash->{project});
