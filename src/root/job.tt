@@ -1,4 +1,4 @@
-[% WRAPPER layout.tt title="Job $resource.get_column('project'):$resource.get_column('jobset'):$resource.name" %]
+[% WRAPPER layout.tt title="Job ${resource.get_column('project')}:${resource.get_column('jobset')}:${resource.name}" %]
 [% PROCESS common.tt %]
 [% hideProjectName=1 hideJobsetName=1 hideJobName=1 %]
 
