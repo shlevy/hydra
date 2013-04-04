@@ -43,7 +43,7 @@
   </table>
 [% END %]
 
-<form class="form-horizontal" action="[% IF create %][% c.uri_for('/jobset' project.name') %][% ELSE %][% c.uri_for('/jobset' project.name jobset.name) %][% END %]" method="post">
+<form class="form-horizontal" action="[% IF create %][% c.uri_for('/jobset' project.name) %][% ELSE %][% c.uri_for('/jobset' project.name jobset.name) %][% END %]" method="post">
   [% UNLESS create %]<input type="hidden" name="x-tunneled-method" value="PUT" />[% END %]
 
   <fieldset>
