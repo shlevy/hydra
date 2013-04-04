@@ -43,6 +43,8 @@ sub job_GET {
         ) ];
 
     $c->stash->{systems} = [$c->stash->{job}->builds->search({iscurrent => 1}, {select => ["system"], distinct => 1})];
+    $c->stash->{project} = { name => $c->stash->{job}->get_column('project') };
+    $c->stash->{jobset} = { name => $c->stash->{job}->get_column('jobset') };
     $self->status_ok(
         $c,
         entity => $c->stash->{job}
