@@ -10,7 +10,7 @@ use Hydra::Helper::CatalystUtils;
 sub jobChain :Chained('/') :PathPart('job') CaptureArgs(3) {
     my ($self, $c, $projectName, $jobsetName, $jobName) = @_;
 
-    $c->stash->{job_} = $c->model('DB::Jobs')->search({'me.project' => $projectName, 'me.jobset' => $jobsetName, 'me.name' => $jobName}, {columns => ['me.name', 'project.name', 'jobset.name'], join => [ 'project', 'jobset' ]});
+    $c->stash->{job_} = $c->model('DB::Jobs')->search({'project' => $projectName, 'jobset' => $jobsetName, 'name' => $jobName}, {columns => ['name', 'project', 'jobset']});
     $c->stash->{job} = $c->stash->{job_}->single;
     unless ($c->stash->{job}) {
         $self->status_not_found(
@@ -19,8 +19,6 @@ sub jobChain :Chained('/') :PathPart('job') CaptureArgs(3) {
         );
         $c->detach;
     }
-    $c->stash->{project} = $c->stash->{job}->project;
-    $c->stash->{jobset} = $c->stash->{job}->jobset;
 }
 
 
@@ -57,12 +55,12 @@ sub get_builds : Chained('jobChain') PathPart('') CaptureArgs(0) {
     my ($self, $c) = @_;
     $c->stash->{allBuilds} = $c->stash->{job}->builds;
     $c->stash->{jobStatus} = $c->model('DB')->resultset('JobStatusForJob')
-        ->search({}, {bind => [$c->stash->{project}->name, $c->stash->{jobset}->name, $c->stash->{job}->name]});
+        ->search({}, {bind => [$c->stash->{job}->get_column('project'), $c->stash->{job}->get_column('jobset'), $c->stash->{job}->name]});
     $c->stash->{allJobs} = $c->stash->{job_};
     $c->stash->{latestSucceeded} = $c->model('DB')->resultset('LatestSucceededForJob')
-        ->search({}, {bind => [$c->stash->{project}->name, $c->stash->{jobset}->name, $c->stash->{job}->name]});
+        ->search({}, {bind => [$c->stash->{job}->get_column('project'), $c->stash->{job}->get_column('jobset'), $c->stash->{job}->name]});
     $c->stash->{channelBaseName} =
-        $c->stash->{project}->name . "-" . $c->stash->{jobset}->name . "-" . $c->stash->{job}->name;
+        $c->stash->{job}->get_column('project') . "-" . $c->stash->{job}->get_column('jobset') . "-" . $c->stash->{job}->name;
 }
 
 
