@@ -310,7 +310,7 @@ sub push : Chained('api') PathPart('push') Args(0) {
 
     $self->status_ok(
         $c,
-        entity => { jobsetsTriggered => $c->stash->{jobsetsTriggered} }
+        entity => { jobsetsTriggered => $c->stash->{json}->{jobsetsTriggered} }
     );
 }
 
