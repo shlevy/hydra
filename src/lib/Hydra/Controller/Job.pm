@@ -10,7 +10,7 @@ use Hydra::Helper::CatalystUtils;
 sub jobChain :Chained('/') :PathPart CaptureArgs(3) {
     my ($self, $c, $projectName, $jobsetName, $jobName) = @_;
 
-    $c->stash->{job_} = $c->model('DB::Jobs')->search({project => $projectName, jobset => $jobsetName, name => $jobName}, {columns => ['me.name', 'project.name', 'jobset.name'], join => [ 'project', 'jobset' ]});
+    $c->stash->{job_} = $c->model('DB::Jobs')->search({'me.project' => $projectName, 'me.jobset' => $jobsetName, 'me.name' => $jobName}, {columns => ['me.name', 'project.name', 'jobset.name'], join => [ 'project', 'jobset' ]});
     $c->stash->{job} = $c->stash->{job_}->single;
     unless ($c->stash->{job}) {
         $self->status_not_found(
