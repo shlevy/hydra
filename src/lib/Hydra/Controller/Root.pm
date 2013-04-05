@@ -239,7 +239,9 @@ sub end :ActionClass('RenderView') {
             $c->stash->{httpStatus} =
                 $c->response->status . " " . HTTP::Status::status_message($c->response->status);
         }
-    } elsif (defined $c->stash->{resource} and defined $c->stash->{resource}->{error}) {
+    } elsif (defined $c->stash->{resource} and
+        (ref $c->stash->{resource} eq ref {}) and
+        defined $c->stash->{resource}->{error}) {
         $c->stash->{template} = 'error.tt';
         $c->stash->{httpStatus} =
             $c->response->status . " " . HTTP::Status::status_message($c->response->status);
