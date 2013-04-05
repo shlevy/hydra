@@ -13,7 +13,7 @@ use Hydra::Helper::CatalystUtils;
 __PACKAGE__->config->{namespace} = '';
 
 
-sub login :Local {
+sub login :Local :Args(0) {
     my ($self, $c) = @_;
 
     my $username = $c->request->params->{username} || "";
@@ -34,7 +34,7 @@ sub login :Local {
 }
 
 
-sub logout :Local {
+sub logout :Local :Args(0) {
     my ($self, $c) = @_;
     $c->logout;
     $c->response->redirect($c->request->referer || $c->uri_for('/'));

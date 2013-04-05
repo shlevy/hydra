@@ -47,7 +47,7 @@ sub errors : Chained('get_builds') PathPart Args(0) {
 }
 
 
-sub all : Chained('get_builds') PathPart {
+sub all : Chained('get_builds') PathPart :Args(0) {
     my ($self, $c) = @_;
 
     $c->stash->{template} = 'all.tt';

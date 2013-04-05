@@ -99,7 +99,7 @@ sub view_build : Chained('build') PathPart('') Args(0) {
 }
 
 
-sub view_nixlog : Chained('build') PathPart('nixlog') {
+sub view_nixlog : Chained('build') PathPart('nixlog') :Args(2) {
     my ($self, $c, $stepnr, $mode) = @_;
 
     my $step = $c->stash->{build}->buildsteps->find({stepnr => $stepnr});
@@ -111,7 +111,7 @@ sub view_nixlog : Chained('build') PathPart('nixlog') {
 }
 
 
-sub view_log : Chained('build') PathPart('log') {
+sub view_log : Chained('build') PathPart('log') :Args(1) {
     my ($self, $c, $mode) = @_;
     showLog($c, $c->stash->{build}->drvpath, $mode);
 }
@@ -177,7 +177,7 @@ sub checkPath {
 }
 
 
-sub download : Chained('build') PathPart {
+sub download : Chained('build') PathPart :Args(2) {
     my ($self, $c, $productnr, @path) = @_;
 
     $productnr = 1 if !defined $productnr;
@@ -224,7 +224,7 @@ sub download : Chained('build') PathPart {
 # Redirect to a download with the given type.  Useful when you want to
 # link to some build product of the latest build (i.e. in conjunction
 # with the .../latest redirect).
-sub download_by_type : Chained('build') PathPart('download-by-type') {
+sub download_by_type : Chained('build') PathPart('download-by-type') :Args(3) {
     my ($self, $c, $type, $subtype, @path) = @_;
 
     notFound($c, "You need to specify a type and a subtype in the URI.")
@@ -338,7 +338,7 @@ sub getDependencyGraph {
 }
 
 
-sub build_deps : Chained('build') PathPart('build-deps') {
+sub build_deps : Chained('build') PathPart('build-deps') :Args(0) {
     my ($self, $c) = @_;
     my $build = $c->stash->{build};
     my $drvPath = $build->drvpath;
@@ -351,7 +351,7 @@ sub build_deps : Chained('build') PathPart('build-deps') {
 }
 
 
-sub runtime_deps : Chained('build') PathPart('runtime-deps') {
+sub runtime_deps : Chained('build') PathPart('runtime-deps') :Args(0) {
     my ($self, $c) = @_;
     my $build = $c->stash->{build};
     my @outPaths = map { $_->path } $build->buildoutputs->all;

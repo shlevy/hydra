@@ -78,7 +78,7 @@ sub queue_DELETE {
 }
 
 
-sub timeline :Local {
+sub timeline :Local :Args(0) {
     my ($self, $c) = @_;
     my $pit = time();
     $c->stash->{pit} = $pit;
@@ -172,7 +172,7 @@ sub get_builds :Chained('/') :PathPart :CaptureArgs(0) {
 }
 
 
-sub robots_txt :Path('robots.txt') {
+sub robots_txt :Path('robots.txt') :Args(0) {
     my ($self, $c) = @_;
 
     sub uri_for {

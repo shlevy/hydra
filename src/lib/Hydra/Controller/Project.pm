@@ -7,7 +7,7 @@ use Hydra::Helper::Nix;
 use Hydra::Helper::CatalystUtils;
 
 
-sub projects :Path('/project') :ActionClass('REST::ForBrowsers') { }
+sub projects :Path('/project') :ActionClass('REST::ForBrowsers') :Args(0) { }
 
 sub projects_POST {
     my ($self, $c) = @_;
@@ -77,10 +77,10 @@ sub projectChain :Chained('/') :PathPart('project') :CaptureArgs(1) {
 }
 
 
-sub project :Chained('projectChain') :PathPart('') :ActionClass('REST::ForBrowsers') { }
+sub project :Chained('projectChain') :PathPart('') :ActionClass('REST::ForBrowsers') :Args(0) { }
 
 sub project_GET {
-    my ($self, $c, $projectName) = @_;
+    my ($self, $c) = @_;
 
     $c->stash->{template} = 'project.tt';
 
@@ -162,7 +162,7 @@ sub requireMayCreateProjects {
 }
 
 
-sub create :Path('/create-project') :ActionClass('REST') { }
+sub create :Path('/create-project') :ActionClass('REST') :Args(0) { }
 
 sub create_GET {
     my ($self, $c) = @_;

@@ -33,7 +33,7 @@ sub getChannelData {
 }
 
 
-sub closure : Chained('nix') PathPart : ActionClass('REST') { }
+sub closure : Chained('nix') PathPart : ActionClass('REST') :Args(0) { }
 
 sub closure_HEAD {
     my ($self, $c) = @_;
