@@ -4,5 +4,8 @@
 [% FOREACH error IN resource.errors %]
    <div class="alert alert-error">[% HTML.escape(error) %]</div>
 [% END %]
+[% IF resource.error %]
+   <div class="alert alert-error">[% HTML.escape(resource.error) %]</div>
+[% END %]
 
 [% END %]
