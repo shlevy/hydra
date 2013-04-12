@@ -170,10 +170,9 @@ sub defaultUriForProduct {
 
 sub checkPath {
     my ($self, $c, $path) = @_;
-    my $storeDir = $Nix::Config::storeDir . "/";
-    error($c, "Invalid path in build product.")
-        if substr($path, 0, length($storeDir)) ne $storeDir || $path =~ /\/\.\./;
-    error($c, "Path ‘$path’ is a symbolic link.") if -l $path;
+    my $path = pathIsInsidePrefix($path, $Nix::Config::storeDir);
+    error($c, "Build product refers outside of the Nix store.") unless defined $path;
+    return $path;
 }
 
 
@@ -203,7 +202,7 @@ sub download : Chained('build') PathPart :Args(2) {
     $path .= "/" . join("/", @path) if scalar @path > 0;
 
     # Make sure the file is in the Nix store.
-    checkPath($self, $c, $path);
+    $path = checkPath($self, $c, $path);
 
     # If this is a directory but no "/" is attached, then redirect.
     if (-d $path && substr($c->request->uri, -1) ne "/") {
@@ -247,14 +246,19 @@ sub contents : Chained('build') PathPart Args(1) {
 
     my $path = $product->path;
 
-    checkPath($self, $c, $path);
+    $path = checkPath($self, $c, $path);
 
     notFound($c, "Product $path has disappeared.") unless -e $path;
+
+    # Sanitize $path to prevent shell injection attacks.
+    $path =~ /^\/[\/[A-Za-z0-9_\-\.=]+$/ or die "Filename contains illegal characters.\n";
+
+    # FIXME: don't use shell invocations below.
 
     my $res;
 
     if ($product->type eq "nix-build" && -d $path) {
-        $res = `cd $path && find . -print0 | xargs -0 ls -ld --`;
+        $res = `cd '$path' && find . -print0 | xargs -0 ls -ld --`;
         error($c, "`ls -lR' error: $?") if $? != 0;
 
         my $baseuri = $c->uri_for('/build', $c->stash->{build}->id, 'download', $product->productnr);
@@ -263,33 +267,33 @@ sub contents : Chained('build') PathPart Args(1) {
     }
 
     elsif ($path =~ /\.rpm$/) {
-        $res = `rpm --query --info --package "$path"`;
+        $res = `rpm --query --info --package '$path'`;
         error($c, "RPM error: $?") if $? != 0;
         $res .= "===\n";
-        $res .= `rpm --query --list --verbose --package "$path"`;
+        $res .= `rpm --query --list --verbose --package '$path'`;
         error($c, "RPM error: $?") if $? != 0;
     }
 
     elsif ($path =~ /\.deb$/) {
-        $res = `dpkg-deb --info "$path"`;
+        $res = `dpkg-deb --info '$path'`;
         error($c, "`dpkg-deb' error: $?") if $? != 0;
         $res .= "===\n";
-        $res .= `dpkg-deb --contents "$path"`;
+        $res .= `dpkg-deb --contents '$path'`;
         error($c, "`dpkg-deb' error: $?") if $? != 0;
     }
 
     elsif ($path =~ /\.(tar(\.gz|\.bz2|\.xz|\.lzma)?|tgz)$/ ) {
-        $res = `tar tvfa "$path"`;
+        $res = `tar tvfa '$path'`;
         error($c, "`tar' error: $?") if $? != 0;
     }
 
     elsif ($path =~ /\.(zip|jar)$/ ) {
-        $res = `unzip -v "$path"`;
+        $res = `unzip -v '$path'`;
         error($c, "`unzip' error: $?") if $? != 0;
     }
 
     elsif ($path =~ /\.iso$/ ) {
-        $res = `isoinfo -d -i "$path" && isoinfo -l -R -i "$path"`;
+        $res = `isoinfo -d -i '$path' && isoinfo -l -R -i '$path'`;
         error($c, "`isoinfo' error: $?") if $? != 0;
     }
 
@@ -586,6 +590,14 @@ sub evals : Chained('build') PathPart('evals') Args(0) {
     $c->stash->{resultsPerPage} = $resultsPerPage;
     $c->stash->{total} = $evals->search({hasnewbuilds => 1})->count;
     $c->stash->{evals} = getEvals($self, $c, $evals, ($page - 1) * $resultsPerPage, $resultsPerPage)
+}
+
+
+sub reproduce : Chained('build') PathPart('reproduce') Args(0) {
+    my ($self, $c) = @_;
+    $c->response->content_type('text/x-shellscript');
+    $c->response->header('Content-Disposition', 'attachment; filename="reproduce-build-' . $c->stash->{build}->id . '.sh"');
+    $c->stash->{template} = 'reproduce.tt';
 }
 
 
