@@ -3,20 +3,32 @@
 }:
 
 let
-  config.perlPackageOverrides = p: {
-    DBIxClass = with p.perlPackages; buildPerlPackage {
-      name = "DBIx-Class-0.08242-TRIAL";
-      src = fetchurl {
-        url = http://cpan.metacpan.org/authors/id/R/RI/RIBASUSHI/DBIx-Class-0.08242-TRIAL.tar.gz;
-        sha256 = "1hhn07ib47qgpx8ddji2lrhwdivdgaz8dzy5fpfb9vjpb37m7jxp";
+  config = {
+    perlPackageOverrides = p: {
+      DBIxClass = with p.perlPackages; buildPerlPackage {
+        name = "DBIx-Class-0.08242-TRIAL";
+        src = fetchurl {
+          url = http://cpan.metacpan.org/authors/id/R/RI/RIBASUSHI/DBIx-Class-0.08242-TRIAL.tar.gz;
+          sha256 = "1hhn07ib47qgpx8ddji2lrhwdivdgaz8dzy5fpfb9vjpb37m7jxp";
+        };
+        buildInputs = [ DBDSQLite PackageStash TestException TestWarn TestDeep ];
+        propagatedBuildInputs = [ ClassAccessorGrouped ClassC3Componentised ClassInspector ClassMethodModifiers ConfigAny ContextPreserve DataCompare DataDumperConcise DataPage DBI DevelGlobalDestruction HashMerge ModuleFind Moo MROCompat namespaceclean PathClass ScopeGuard SQLAbstract strictures SubName TryTiny ];
+        meta = {
+          homepage = http://www.dbix-class.org/;
+          description = "Extensible and flexible object <-> relational mapper";
+          license = "perl";
+        };
       };
-      buildInputs = [ DBDSQLite PackageStash TestException TestWarn TestDeep ];
-      propagatedBuildInputs = [ ClassAccessorGrouped ClassC3Componentised ClassInspector ClassMethodModifiers ConfigAny ContextPreserve DataCompare DataDumperConcise DataPage DBI DevelGlobalDestruction HashMerge ModuleFind Moo MROCompat namespaceclean PathClass ScopeGuard SQLAbstract strictures SubName TryTiny ];
-      meta = {
-        homepage = http://www.dbix-class.org/;
-        description = "Extensible and flexible object <-> relational mapper";
-        license = "perl";
-      };
+    };
+
+    packageOverrides = p: {
+      sqlite = p.lib.overrideDerivation p.sqlite (attrs: {
+        name = "sqlite-3.7.14.1";
+         src = p.fetchurl {
+           url = http://www.sqlite.org/sqlite-autoconf-3071401.tar.gz;
+           sha1 = "c464e0e3efe98227c6546b9b1e786b51b8b642fc";
+         };
+      });
     };
   };
 in rec {
