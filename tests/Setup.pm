@@ -6,13 +6,14 @@ use Hydra::Helper::Nix;
 use Hydra::Model::DB;
 use Hydra::Helper::AddBuilds;
 use Cwd;
-
+use Digest::SHA1  qw(sha1_hex);
+ 
 our @ISA = qw(Exporter);
 our @EXPORT = qw(hydra_setup nrBuildsForJobset queuedBuildsForJobset nrQueuedBuildsForJobset createBaseJobset createJobsetWithOneInput evalSucceeds runBuild updateRepository);
 
 sub hydra_setup {
     my ($db) = @_;
-    $db->resultset('Users')->create({ username => "root", emailaddress => 'root@invalid.org', password => '' });
+    $db->resultset('Users')->create({ username => "root", emailaddress => 'root@invalid.org', password => sha1_hex("foobar") });
 }
 
 sub nrBuildsForJobset {
