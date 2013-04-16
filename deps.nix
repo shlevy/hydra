@@ -37,6 +37,7 @@ with pkgs;
   perlPackages.TextDiff
   perlPackages.TextTable
   perlPackages.XMLSimple
+  perlPackages.LWP
   nixUnstable
   guile                                  # optional, for Guile + Guix support
 ]

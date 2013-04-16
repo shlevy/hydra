@@ -1,3 +1,6 @@
+API_TESTS = \
+  api/login-test.pl
+
 TESTS_ENVIRONMENT = \
   BZR_HOME="$(abs_builddir)/data"			\
   HYDRA_DBI="dbi:SQLite:db.sqlite"			\
@@ -12,17 +15,20 @@ TESTS_ENVIRONMENT = \
   NIX_BUILD_HOOK=					\
   PERL5LIB="$(srcdir):$(top_srcdir)/src/lib:$$PERL5LIB"	\
   PATH=$(abs_top_srcdir)/src/script:$(abs_top_srcdir)/src/c:$$PATH \
+  API_TESTS=$(API_TESTS) \
   perl -w
 
 EXTRA_DIST = \
   $(wildcard *.pm) \
   $(wildcard jobs/*.nix) \
   $(wildcard jobs/*.sh) \
+  $(API_TESTS) \
   $(TESTS)
 
 TESTS = \
   query-all-tables.pl \
-  evaluation-tests.pl
+  evaluation-tests.pl \
+  api.pl
 
 clean:
 	chmod -R a+w nix || true

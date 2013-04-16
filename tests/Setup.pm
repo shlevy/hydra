@@ -7,9 +7,11 @@ use Hydra::Model::DB;
 use Hydra::Helper::AddBuilds;
 use Cwd;
 use Digest::SHA1  qw(sha1_hex);
+use LWP::UserAgent;
+use JSON;
  
 our @ISA = qw(Exporter);
-our @EXPORT = qw(hydra_setup nrBuildsForJobset queuedBuildsForJobset nrQueuedBuildsForJobset createBaseJobset createJobsetWithOneInput evalSucceeds runBuild updateRepository);
+our @EXPORT = qw(hydra_setup nrBuildsForJobset queuedBuildsForJobset nrQueuedBuildsForJobset createBaseJobset createJobsetWithOneInput evalSucceeds runBuild updateRepository request_json);
 
 sub hydra_setup {
     my ($db) = @_;
@@ -84,6 +86,14 @@ sub updateRepository {
     my ($message, $loop, $status) = $stdout =~ m/::(.*) -- (.*) -- (.*)::/;
     print STDOUT "Update $scm repository: $message\n";
     return ($loop eq "continue", $status eq "updated");
+}
+
+my $ua = LWP::UserAgent->new;
+
+sub request_json {
+    my ($opts) = @_;
+    my $req = HTTP::Request->new($opts->{method} or "GET", "http://localhost:3000$opts->{uri}", { Accept => "application/json" }, defined $opts->{data} ? encode_json($opts->{data}) : "");
+    return $ua->request($req);
 }
 
 1;
