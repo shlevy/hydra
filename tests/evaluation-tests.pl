@@ -9,8 +9,6 @@ my $db = Hydra::Model::DB->new;
 
 use Test::Simple tests => 68;
 
-hydra_setup($db);
-
 my $res;
 my $stdout;
 my $stderr;

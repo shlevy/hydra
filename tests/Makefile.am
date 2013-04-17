@@ -2,8 +2,8 @@ API_TESTS = \
   api/login-test.pl \
   api/logout-test.pl
 
-TESTS_ENVIRONMENT = \
-  BZR_HOME="$(abs_builddir)/data"			\
+AM_TESTS_ENVIRONMENT = \
+  export BZR_HOME="$(abs_builddir)/data"		\
   HYDRA_DBI="dbi:SQLite:db.sqlite"			\
   HYDRA_DATA="$(abs_builddir)/data"			\
   HYDRA_HOME="$(top_srcdir)/src"			\
@@ -16,14 +16,18 @@ TESTS_ENVIRONMENT = \
   NIX_BUILD_HOOK=					\
   PERL5LIB="$(srcdir):$(top_srcdir)/src/lib:$$PERL5LIB"	\
   PATH=$(abs_top_srcdir)/src/script:$(abs_top_srcdir)/src/c:$$PATH \
-  API_TESTS="$(API_TESTS)" \
-  perl -w
+  API_TESTS="$(API_TESTS)";
+
+LOG_COMPILER = perl
+
+AM_LOG_FLAGS = -w
 
 EXTRA_DIST = \
   $(wildcard *.pm) \
   $(wildcard jobs/*.nix) \
   $(wildcard jobs/*.sh) \
   $(API_TESTS) \
+  fixture-setup.sql \
   $(TESTS)
 
 TESTS = \
@@ -38,8 +42,9 @@ clean:
 
 check_SCRIPTS = db.sqlite repos
 
-db.sqlite: $(top_srcdir)/src/sql/hydra-sqlite.sql
-	$(TESTS_ENVIRONMENT) $(top_srcdir)/src/script/hydra-init
+db.sqlite: $(top_srcdir)/src/sql/hydra-sqlite.sql $(srcdir)/fixture-setup.sql
+	$(AM_TESTS_ENVIRONMENT) $(LOG_COMPILER) $(AM_LOG_FLAGS) $(top_srcdir)/src/script/hydra-init
+	sqlite3 $@ < $(srcdir)/fixture-setup.sql
 
 repos: dirs
 

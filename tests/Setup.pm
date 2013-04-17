@@ -11,12 +11,7 @@ use LWP::UserAgent;
 use JSON;
  
 our @ISA = qw(Exporter);
-our @EXPORT = qw(hydra_setup nrBuildsForJobset queuedBuildsForJobset nrQueuedBuildsForJobset createBaseJobset createJobsetWithOneInput evalSucceeds runBuild updateRepository request_json login);
-
-sub hydra_setup {
-    my ($db) = @_;
-    $db->resultset('Users')->create({ username => "root", emailaddress => 'root@invalid.org', password => sha1_hex("foobar"), userroles => [ { role => 'admin' } ] });
-}
+our @EXPORT = qw(nrBuildsForJobset queuedBuildsForJobset nrQueuedBuildsForJobset createBaseJobset createJobsetWithOneInput evalSucceeds runBuild updateRepository request_json login);
 
 sub nrBuildsForJobset {
     my ($jobset) = @_;

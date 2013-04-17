@@ -111,6 +111,8 @@ in rec {
 
       LOGNAME = "foo";
 
+      enableParallelBuilding = true;
+
       meta.description = "Build of Hydra on ${system}";
     };
 
