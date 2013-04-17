@@ -1,7 +1,7 @@
 use strict;
 use LWP::UserAgent;
 
-system("hydra-server &");
+system("DBIC_TRACE=1 hydra-server -d &");
 
 my $ua = LWP::UserAgent->new;
 
@@ -14,9 +14,20 @@ while (1) {
     }
 }
 
-my $failed = 0;
+my @pids = ();
 foreach my $test (split(" ",$ENV{API_TESTS})) {
-    system("perl -w $test") == 0 or $failed = 1;
+    my $pid = fork();
+    die "Couldn't fork" unless defined $pid;
+    if ($pid == 0) {
+      exec("perl -w $test") or die "Couldn't exec";
+    }
+    push @pids, $pid;
+}
+
+my $failed = 0;
+foreach my $pid (@pids) {
+    waitpid($pid, 0) == $pid or die "Couldn't wait";
+    $failed = 1 unless $? == 0;
 }
 
 if ($failed) {
