@@ -26,8 +26,15 @@ sub login_GET {
 sub login_POST {
     my ($self, $c) = @_;
 
-    my $username = $c->request->data->{username} || $c->request->params->{username};
-    my $password = $c->request->data->{password} || $c->request->params->{password};
+    my $username;
+    my $password;
+    if (defined $c->request->data) {
+        $username = $c->request->data->{username};
+        $password = $c->request->data->{password};
+    } else {
+        $username = $c->request->params->{username};
+        $password = $c->request->params->{password};
+    }
 
     if ($username && $password) {
         if ($c->authenticate({username => $username, password => $password})) {
