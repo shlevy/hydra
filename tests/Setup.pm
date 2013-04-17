@@ -92,7 +92,11 @@ my $ua = LWP::UserAgent->new;
 
 sub request_json {
     my ($opts) = @_;
-    my $req = HTTP::Request->new($opts->{method} or "GET", "http://localhost:3000$opts->{uri}", { Accept => "application/json" }, defined $opts->{data} ? encode_json($opts->{data}) : "");
+    my $req = HTTP::Request->new;
+    $req->method($opts->{method} or "GET");
+    $req->uri("http://localhost:3000$opts->{uri}");
+    $req->header(Accept => "application/json");
+    $req->content(encode_json($opts->{data})) if defined $opts->{data};
     return $ua->request($req);
 }
 

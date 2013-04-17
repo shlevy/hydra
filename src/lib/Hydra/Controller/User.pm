@@ -3,7 +3,7 @@ package Hydra::Controller::User;
 use utf8;
 use strict;
 use warnings;
-use base 'Catalyst::Controller';
+use base 'Hydra::Base::Controller::REST';
 use Crypt::RandPasswd;
 use Digest::SHA1 qw(sha1_hex);
 use Hydra::Helper::Nix;
@@ -13,24 +13,36 @@ use Hydra::Helper::CatalystUtils;
 __PACKAGE__->config->{namespace} = '';
 
 
-sub login :Local :Args(0) {
+sub login :Local :Args(0) :ActionClass('REST::ForBrowsers') { }
+
+sub login_GET {
+    my ($self, $c) = @_;
+    my $baseurl = $c->uri_for('/');
+    my $referer = $c->request->referer;
+    $c->session->{referer} = $referer if defined $referer && $referer =~ m/^($baseurl)/;
+    $c->stash->{template} = 'login.tt';
+}
+
+sub login_POST {
     my ($self, $c) = @_;
 
-    my $username = $c->request->params->{username} || "";
-    my $password = $c->request->params->{password} || "";
-
-    if ($username eq "" && $password eq "" && !defined $c->session->{referer}) {
-        my $baseurl = $c->uri_for('/');
-        my $referer = $c->request->referer;
-        $c->session->{referer} = $referer if defined $referer && $referer =~ m/^($baseurl)/;
-    }
+    my $username = $c->request->data->{username} || $c->request->params->{username};
+    my $password = $c->request->data->{password} || $c->request->params->{password};
 
     if ($username && $password) {
-        backToReferer($c) if $c->authenticate({username => $username, password => $password});
-        $c->stash->{errorMsg} = "Bad username or password.";
+        if ($c->authenticate({username => $username, password => $password})) {
+            if ($c->request->looks_like_browser) {
+                backToReferer($c) 
+            } else {
+                $self->status_no_content($c);
+            }
+        } else {
+            $self->status_forbidden($c, message => "Bad username or password.");
+            if ($c->request->looks_like_browser) {
+                $c->forward('login', 'GET');
+            }
+        }
     }
-
-    $c->stash->{template} = 'login.tt';
 }
 
 
