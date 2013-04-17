@@ -23,6 +23,8 @@ sub projectChain :Chained('/') :PathPart('jobset') :CaptureArgs(1) {
 
     my $project = $c->model('DB::Projects')->find($projectName);
 
+    $c->stash->{params} = $c->request->data or $c->request->params;
+
     unless ($project) {
         $self->status_not_found(
             $c,
@@ -42,9 +44,9 @@ sub project_POST {
 
     requireProjectOwner($c, $c->stash->{project});
 
-    my $jobsetName = trim $c->request->params->{name};
+    my $jobsetName = trim $c->stash->{params}->{name};
     my $exprType =
-        $c->request->params->{"nixexprpath"} =~ /.scm$/ ? "guile" : "nix";
+        $c->stash->{params}->{"nixexprpath"} =~ /.scm$/ ? "guile" : "nix";
 
     if ($jobsetName !~ /^$jobsetNameRE$/) {
         $self->status_bad_request(
@@ -278,10 +280,10 @@ sub nixExprPathFromParams {
     my ($c) = @_;
 
     # The Nix expression path must be relative and can't contain ".." elements.
-    my $nixExprPath = trim $c->request->params->{"nixexprpath"};
+    my $nixExprPath = trim $c->stash->{params}->{"nixexprpath"};
     error($c, "Invalid Nix expression path: $nixExprPath") if $nixExprPath !~ /^$relPathRE$/;
 
-    my $nixExprInput = trim $c->request->params->{"nixexprinput"};
+    my $nixExprInput = trim $c->stash->{params}->{"nixexprinput"};
     error($c, "Invalid Nix expression input name: $nixExprInput") unless $nixExprInput =~ /^\w+$/;
 
     return ($nixExprPath, $nixExprInput);
@@ -291,10 +293,10 @@ sub nixExprPathFromParams {
 sub checkInput {
     my ($c, $baseName) = @_;
 
-    my $inputName = trim $c->request->params->{"input-$baseName-name"};
+    my $inputName = trim $c->stash->{params}->{"input-$baseName-name"};
     error($c, "Invalid input name: $inputName") unless $inputName =~ /^[[:alpha:]]\w*$/;
 
-    my $inputType = trim $c->request->params->{"input-$baseName-type"};
+    my $inputType = trim $c->stash->{params}->{"input-$baseName-type"};
     error($c, "Invalid input type: $inputType") unless
         $inputType eq "svn" || $inputType eq "svn-checkout" || $inputType eq "hg" || $inputType eq "tarball" ||
         $inputType eq "string" || $inputType eq "path" || $inputType eq "boolean" || $inputType eq "bzr" || $inputType eq "bzr-checkout" ||
@@ -316,33 +318,33 @@ sub checkInputValue {
 sub updateJobset {
     my ($c, $jobset) = @_;
 
-    my $jobsetName = trim $c->request->params->{"name"};
+    my $jobsetName = trim $c->stash->{params}->{"name"};
     error($c, "Invalid jobset name: ‘$jobsetName’") if $jobsetName !~ /^$jobsetNameRE$/;
 
     # When the expression is in a .scm file, assume it's a Guile + Guix
     # build expression.
     my $exprType =
-        $c->request->params->{"nixexprpath"} =~ /.scm$/ ? "guile" : "nix";
+        $c->stash->{params}->{"nixexprpath"} =~ /.scm$/ ? "guile" : "nix";
 
     my ($nixExprPath, $nixExprInput) = nixExprPathFromParams $c;
 
     $jobset->update(
         { name => $jobsetName
-        , description => trim($c->request->params->{"description"})
+        , description => trim($c->stash->{params}->{"description"})
         , nixexprpath => $nixExprPath
         , nixexprinput => $nixExprInput
-        , enabled => defined $c->request->params->{enabled} ? 1 : 0
-        , enableemail => defined $c->request->params->{enableemail} ? 1 : 0
-        , emailoverride => trim($c->request->params->{emailoverride}) || ""
-        , hidden => defined $c->request->params->{visible} ? 0 : 1
-        , keepnr => trim($c->request->params->{keepnr}) || 3
+        , enabled => defined $c->stash->{params}->{enabled} ? 1 : 0
+        , enableemail => defined $c->stash->{params}->{enableemail} ? 1 : 0
+        , emailoverride => trim($c->stash->{params}->{emailoverride}) || ""
+        , hidden => defined $c->stash->{params}->{visible} ? 0 : 1
+        , keepnr => trim($c->stash->{params}->{keepnr}) || 3
         , triggertime => $jobset->triggertime // time()
         });
 
     my %inputNames;
 
     # Process the inputs of this jobset.
-    foreach my $param (keys %{$c->request->params}) {
+    foreach my $param (keys %{$c->stash->{params}}) {
         next unless $param =~ /^input-(\w+)-name$/;
         my $baseName = $1;
         next if $baseName eq "template";
@@ -366,7 +368,7 @@ sub updateJobset {
         # Update the values for this input.  Just delete all the
         # current ones, then create the new values.
         $input->jobsetinputalts->delete_all;
-        my $values = $c->request->params->{"input-$baseName-values"};
+        my $values = $c->stash->{params}->{"input-$baseName-values"};
         $values = [] unless defined $values;
         $values = [$values] unless ref($values) eq 'ARRAY';
         my $altnr = 0;
@@ -438,7 +440,7 @@ sub latest_eval_GET {
     my ($self, $c, @args) = @_;
     my $eval = getLatestFinishedEval($c, $c->stash->{jobset})
         or notFound($c, "No evaluation found.");
-    $c->res->redirect($c->uri_for($c->controller('JobsetEval')->action_for("view"), [$eval->id], @args, $c->req->params));
+    $c->res->redirect($c->uri_for($c->controller('JobsetEval')->action_for("view"), [$eval->id], @args, $c->stash->{params}));
 }
 
 
