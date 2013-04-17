@@ -57,8 +57,8 @@ sub projectChain :Chained('/') :PathPart('project') :CaptureArgs(1) {
       "me.enabled",
       "me.hidden",
       "me.homepage",
-      "owner.userName",
-      "owner.fullName",
+      "owner.username",
+      "owner.fullname",
       "views.name",
       "releases.name",
       "releases.timestamp",
@@ -89,7 +89,7 @@ sub project_GET {
         entity => {
           project => $c->stash->{project},
           #!!! Fixme: Want to JOIN this with the projects query
-          jobsets => $c->stash->{project}->jobsets->search(isProjectOwner($c, $c->stash->{project}) ? {} : { hidden => 0 },
+          jobsets => [$c->stash->{project}->jobsets->search(isProjectOwner($c, $c->stash->{project}) ? {} : { hidden => 0 },
             { order_by => "name"
             , columns => [ {
                 nrscheduled => "(select count(*) from Builds as a where a.finished = 0 and me.project = a.project and me.name = a.jobset and a.isCurrent = 1)"
@@ -97,7 +97,7 @@ sub project_GET {
               , nrsucceeded => "(select count(*) from Builds as a where a.finished = 1 and me.project = a.project and me.name = a.jobset and buildstatus = 0 and a.isCurrent = 1)"
               , nrtotal => "(select count(*) from Builds as a where me.project = a.project and me.name = a.jobset and a.isCurrent = 1)"
               }, "enabled", "hidden", "name", "description", "lastcheckedtime" ]
-            }),
+            })],
         }
     );
 }
