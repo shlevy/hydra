@@ -1,6 +1,5 @@
 API_TESTS = \
-  api/login-test.pl \
-  api/logout-test.pl
+  $(wildcard api/*.pl)
 
 AM_TESTS_ENVIRONMENT = \
   export BZR_HOME="$(abs_builddir)/data"		\
