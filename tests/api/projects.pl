@@ -9,8 +9,6 @@ createBaseJobset("api-2", "default.nix");
 
 my $res = request_json({ uri => "/project/tests" });
 
-print $res->as_string();
-
 ok($res->code() == 200, "Can get existing project");
 
 my $data = decode_json($res->content);

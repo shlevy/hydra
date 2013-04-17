@@ -97,7 +97,9 @@ sub request_json {
     $req->uri("http://localhost:3000$opts->{uri}");
     $req->header(Accept => "application/json");
     $req->content(encode_json($opts->{data})) if defined $opts->{data};
-    return $ua->request($req);
+    my $res = $ua->request($req);
+    print $res->as_string();
+    return $res;
 }
 
 1;

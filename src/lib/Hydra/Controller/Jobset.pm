@@ -64,15 +64,15 @@ sub project_POST {
         updateJobset($c, $jobset);
     });
 
-    my $uri = $c->uri_for("jobset",
-            [$c->stash->{project}->name, $jobsetName]);
+    my $uri = $c->uri_for("/jobset",
+            $c->stash->{project}->name, $jobsetName);
     if ($c->req->looks_like_browser) {
         $c->res->redirect($uri);
     } else {
         $self->status_created(
             $c,
-            location => $uri,
-            entity => { name => $jobsetName, uri => $uri, type => "jobset" }
+            location => "$uri",
+            entity => { name => $jobsetName, uri => "$uri", type => "jobset" }
         );
     }
 }
@@ -344,6 +344,7 @@ sub updateJobset {
     my %inputNames;
 
     # Process the inputs of this jobset.
+    # !!! TODO: Make it possible to pass in params like { inputs: { name: {blah} } } for hierarchical content-types (i.e. not multipart/form-data)
     foreach my $param (keys %{$c->stash->{params}}) {
         next unless $param =~ /^input-(\w+)-name$/;
         my $baseName = $1;
@@ -405,7 +406,7 @@ sub evals_GET {
 
     $c->stash->{template} = 'evals.tt';
 
-    my $page = int($c->req->param('page') || "1") || 1;
+    my $page = int($c->stash->{params}->{page} || "1") || 1;
 
     my $resultsPerPage = 20;
 
