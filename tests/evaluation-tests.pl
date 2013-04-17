@@ -14,7 +14,6 @@ my $stdout;
 my $stderr;
 
 my $jobsBaseUri = "file://".getcwd;
-my $project = $db->resultset('Projects')->create({name => "tests", displayname => "", owner => "root"});
 my $jobset;
 
 # Most basic test case, no parameters
