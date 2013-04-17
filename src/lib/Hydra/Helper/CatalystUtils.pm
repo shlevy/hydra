@@ -147,12 +147,14 @@ sub isAdmin {
 
 
 sub requireAdmin {
-    my ($c) = @_;
+    my ($self, $c) = @_;
 
-    requireLogin($c) if !$c->user_exists;
+    requireLogin($c) if $c->req->looks_like_browser and !$c->user_exists;
 
-    error($c, "Only administrators can perform this operation.")
-        unless isAdmin($c);
+    unless (isAdmin($c)) {
+      $self->status_forbidden($c, message => "Only administrators can perform this operation.");
+      $c->detach;
+    }
 }
 
 

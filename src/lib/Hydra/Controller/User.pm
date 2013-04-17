@@ -53,10 +53,16 @@ sub login_POST {
 }
 
 
-sub logout :Local :Args(0) {
+sub logout :Local :Args(0) :ActionClass('REST::ForBrowsers') { }
+
+sub logout_POST {
     my ($self, $c) = @_;
     $c->logout;
-    $c->response->redirect($c->request->referer || $c->uri_for('/'));
+    if ($c->request->looks_like_browser) {
+        $c->response->redirect($c->request->referer || $c->uri_for('/'));
+    } else {
+        $self->status_no_content($c);
+    }
 }
 
 
@@ -135,7 +141,7 @@ sub register :Local Args(0) {
 }
 
 
-sub user :Chained('/') PathPart('user') CaptureArgs(1) {
+sub user :Chained('/') :PathPart('user') :CaptureArgs(1) {
     my ($self, $c, $userName) = @_;
 
     requireLogin($c) if !$c->user_exists;

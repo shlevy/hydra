@@ -13,7 +13,7 @@ use Config::General;
 
 sub admin : Chained('/') PathPart('admin') CaptureArgs(0) {
     my ($self, $c) = @_;
-    requireAdmin($c);
+    requireAdmin($self, $c);
     $c->stash->{admin} = 1;
 }
 

@@ -1,5 +1,6 @@
 API_TESTS = \
-  api/login-test.pl
+  api/login-test.pl \
+  api/logout-test.pl
 
 TESTS_ENVIRONMENT = \
   BZR_HOME="$(abs_builddir)/data"			\
@@ -15,7 +16,7 @@ TESTS_ENVIRONMENT = \
   NIX_BUILD_HOOK=					\
   PERL5LIB="$(srcdir):$(top_srcdir)/src/lib:$$PERL5LIB"	\
   PATH=$(abs_top_srcdir)/src/script:$(abs_top_srcdir)/src/c:$$PATH \
-  API_TESTS=$(API_TESTS) \
+  API_TESTS="$(API_TESTS)" \
   perl -w
 
 EXTRA_DIST = \

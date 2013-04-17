@@ -11,11 +11,11 @@ use LWP::UserAgent;
 use JSON;
  
 our @ISA = qw(Exporter);
-our @EXPORT = qw(hydra_setup nrBuildsForJobset queuedBuildsForJobset nrQueuedBuildsForJobset createBaseJobset createJobsetWithOneInput evalSucceeds runBuild updateRepository request_json);
+our @EXPORT = qw(hydra_setup nrBuildsForJobset queuedBuildsForJobset nrQueuedBuildsForJobset createBaseJobset createJobsetWithOneInput evalSucceeds runBuild updateRepository request_json login);
 
 sub hydra_setup {
     my ($db) = @_;
-    $db->resultset('Users')->create({ username => "root", emailaddress => 'root@invalid.org', password => sha1_hex("foobar") });
+    $db->resultset('Users')->create({ username => "root", emailaddress => 'root@invalid.org', password => sha1_hex("foobar"), userroles => [ { role => 'admin' } ] });
 }
 
 sub nrBuildsForJobset {
@@ -89,6 +89,11 @@ sub updateRepository {
 }
 
 my $ua = LWP::UserAgent->new;
+$ua->cookie_jar( {} );
+
+sub login {
+    return request_json({ uri => "/login", method => "POST", data => { username => "root", password => "foobar" } });
+}
 
 sub request_json {
     my ($opts) = @_;
