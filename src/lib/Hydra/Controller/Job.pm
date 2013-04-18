@@ -28,26 +28,27 @@ sub job_GET {
 
     $c->stash->{template} = 'job.tt';
 
-    $c->stash->{lastBuilds} =
-        [ $c->stash->{job}->builds->search({ finished => 1 },
-            { order_by => 'timestamp DESC', rows => 10, columns => [@buildListColumns] }) ];
-
-    $c->stash->{queuedBuilds} = [
-        $c->stash->{job}->builds->search(
-            { finished => 0 },
-            { join => ['project']
-            , order_by => ["priority DESC", "timestamp"]
-            , '+select' => ['project.enabled']
-            , '+as' => ['enabled']
-            }
-        ) ];
-
     $c->stash->{systems} = [$c->stash->{job}->builds->search({iscurrent => 1}, {select => ["system"], distinct => 1})];
     $c->stash->{project} = { name => $c->stash->{job}->get_column('project') };
     $c->stash->{jobset} = { name => $c->stash->{job}->get_column('jobset') };
+
     $self->status_ok(
         $c,
-        entity => $c->stash->{job}
+        entity => {
+            job => $c->stash->{job},
+            lastBuilds => [ $c->stash->{job}->builds->search({ finished => 1 },
+                { order_by => 'timestamp DESC', rows => 10, columns => [@buildListColumns] }
+            )],
+            queuedBuilds => [
+                $c->stash->{job}->builds->search(
+                    { finished => 0 },
+                    { join => ['project']
+                    , order_by => ["priority DESC", "timestamp"]
+                    , '+select' => ['project.enabled']
+                    , '+as' => ['enabled']
+                    }
+            ) ]
+        }
     );
 }
 
