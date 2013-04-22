@@ -30,7 +30,6 @@ EXTRA_DIST = \
   $(TESTS)
 
 TESTS = \
-  query-all-tables.pl \
   evaluation-tests.pl \
   api.pl
 
