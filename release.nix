@@ -6,10 +6,10 @@ let
   config = {
     perlPackageOverrides = p: {
       DBIxClass = with p.perlPackages; buildPerlPackage {
-        name = "DBIx-Class-0.08242-TRIAL";
+        name = "DBIx-Class-0.08249_2";
         src = fetchurl {
-          url = http://cpan.metacpan.org/authors/id/R/RI/RIBASUSHI/DBIx-Class-0.08242-TRIAL.tar.gz;
-          sha256 = "1hhn07ib47qgpx8ddji2lrhwdivdgaz8dzy5fpfb9vjpb37m7jxp";
+          url = http://cpan.metacpan.org/authors/id/R/RI/RIBASUSHI/DBIx-Class-0.08249_02.tar.gz;
+          sha256 = "1xs65d3zy5dn90sy440rnrdph6wy75h0d3w4hvjxgb65zrm45068";
         };
         buildInputs = [ DBDSQLite PackageStash TestException TestWarn TestDeep ];
         propagatedBuildInputs = [ ClassAccessorGrouped ClassC3Componentised ClassInspector ClassMethodModifiers ConfigAny ContextPreserve DataCompare DataDumperConcise DataPage DBI DevelGlobalDestruction HashMerge ModuleFind Moo MROCompat namespaceclean PathClass ScopeGuard SQLAbstract strictures SubName TryTiny ];
