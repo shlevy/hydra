@@ -41,12 +41,12 @@ sub login_POST {
             if ($c->request->looks_like_browser) {
                 backToReferer($c) 
             } else {
-                $self->status_no_content($c);
+                currentUser_GET($self, $c);
             }
         } else {
             $self->status_forbidden($c, message => "Bad username or password.");
             if ($c->request->looks_like_browser) {
-                $c->forward('login', 'GET');
+                login_GET($self, $c);
             }
         }
     }
