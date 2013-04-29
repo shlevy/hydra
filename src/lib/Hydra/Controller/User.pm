@@ -157,7 +157,7 @@ sub currentUser_GET {
         $c,
         entity => {
             user => $user,
-            roles => [ $user->userroles ]
+            roles => [ $user->userroles->all ]
         }
     );
 }
