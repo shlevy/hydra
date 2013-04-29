@@ -147,10 +147,10 @@ sub currentUser_GET {
     my ($self, $c) = @_;
 
     requireLogin($c) if !$c->user_exists;
-    my $user = $c->model('DB::Users')->find($c->user->username, {
+    my $user = $c->model('DB::Users')->search({ 'me.username' => $c->user->username}, {
       columns => [ "me.fullname", "me.emailaddress", "me.username", "userroles.role" ],
       join => "userroles"
-    });
+    })->first;
 
 
     $self->status_ok(
