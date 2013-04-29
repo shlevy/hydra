@@ -141,6 +141,28 @@ sub register :Local Args(0) {
 }
 
 
+sub currentUser :Path('/current-user') :ActionClass('REST') { }
+
+sub currentUser_GET {
+    my ($self, $c) = @_;
+
+    requireLogin($c) if !$c->user_exists;
+    my $user = $c->model('DB::Users')->find($c->user->username, {
+      columns => [ "me.fullname", "me.emailaddress", "me.username", "userroles.role" ],
+      join => "userroles"
+    });
+
+
+    $self->status_ok(
+        $c,
+        entity => {
+            user => $user,
+            roles => [ $user->userroles ]
+        }
+    );
+}
+
+
 sub user :Chained('/') :PathPart('user') :CaptureArgs(1) {
     my ($self, $c, $userName) = @_;
 
