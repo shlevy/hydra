@@ -148,7 +148,9 @@ sub currentUser_GET {
 
     requireLogin($c) if !$c->user_exists;
     my $user = $c->model('DB::Users')->find({ 'me.username' => $c->user->username}, {
-      columns => [ "me.fullname", "me.emailaddress", "me.username" ],
+      columns => [ "me.fullname", "me.emailaddress", "me.username", "userroles.role" ],
+      join => [ "userroles" ],
+      collapse => 1
     });
 
 
@@ -156,7 +158,7 @@ sub currentUser_GET {
         $c,
         entity => {
             user => $user,
-            roles => [ $user->userroles->search({}, { columns => [ "role" ] })->all ]
+            roles => [ $user->userroles->all ]
         }
     );
 }
