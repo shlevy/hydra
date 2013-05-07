@@ -157,6 +157,19 @@ in
           mkdir -p ${baseDir}/data
           chown hydra ${baseDir}/data
           ln -sf ${hydraConf} ${baseDir}/data/hydra.conf
+          if [ ! -f ${baseDir}/.pgpass ]; then
+              pass=$(HOME=/root ${pkgs.openssl}/bin/openssl rand -base64 32)
+              ${config.services.postgresql.package}/bin/psql postgres << EOF
+          CREATE USER hydra PASSWORD '$pass';
+          EOF
+              ${config.services.postgresql.package}/bin/createdb -O hydra hydra
+              cat > ${baseDir}/.pgpass-tmp << EOF
+          localhost:*:hydra:hydra:$pass
+          EOF
+              chown hydra ${baseDir}/.pgpass-tmp
+              chmod 600 ${baseDir}/.pgpass-tmp
+              mv ${baseDir}/.pgpass-tmp ${baseDir}/.pgpass
+          fi
           ${pkgs.shadow}/bin/su hydra -c ${cfg.hydra}/bin/hydra-init
         '';
         serviceConfig.Type = "oneshot";
