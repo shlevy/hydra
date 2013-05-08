@@ -130,7 +130,21 @@ sub jobset_GET {
         entity => {
           jobset => $c->stash->{jobset}
           #!!! Should be part of jobset
-        , evals => getEvals($self, $c, scalar $c->stash->{jobset}->jobsetevals, 0, 10)
+        , evals => getEvals($self, $c, scalar $c->stash->{jobset}->jobsetevals->search({},{
+            columns => [
+              'me.id',
+	      'jobsetevalmembers.eval',
+	      'jobsetevalmembers.build',
+              {
+                'jobsetevalmembers.build.job.name' => 'job.name'
+              , 'jobsetevalmembers.build.logfile' => 'build.logfile'
+              , 'jobsetevalmembers.build.finished' => 'build.finished'
+              , 'jobsetevalmembers.build.buildStatus' => 'build.buildStatus'
+              }
+            ],
+            collapse => 1,
+            join => { jobsetevalmembers => { build => [ 'job' ] } }
+          }), 0, 10)
         }
     );
 }
