@@ -334,7 +334,7 @@ sub getEvals {
 
     my @evals = $evals->search(
         { hasnewbuilds => 1 },
-        { order_by => "id DESC", rows => $rows, offset => $offset });
+        { order_by => "me.id DESC", rows => $rows, offset => $offset });
 
     my @res = ();
     my $cache = {};

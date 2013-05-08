@@ -156,10 +156,7 @@ sub currentUser_GET {
 
     $self->status_ok(
         $c,
-        entity => {
-            user => $user,
-            roles => [ $user->userroles->all ]
-        }
+        entity => $user
     );
 }
 
