@@ -100,11 +100,14 @@ sub jobsetChain :Chained('projectChain') :PathPart('') :CaptureArgs(1) {
         , 'me.project'
         , 'jobsetinputs.name'
         , 'jobsetinputs.type'
-        , {'jobsetinputs.jobsetinputalts.value' => 'jobsetinputalts.value'}
-        ], join => {jobsetinputs => ['jobsetinputalts']}}
+        , {
+            'jobsetinputs.jobsetinputalts.value' => 'jobsetinputalts.value'
+          , 'jobsetinputs.jobsetinputalts.altnr' => 'jobsetinputalts.altnr'
+          }
+        ], collapse => 1, join => {jobsetinputs => ['jobsetinputalts']}}
     );
 
-    $c->stash->{jobset} = $c->stash->{jobset_}->single;
+    $c->stash->{jobset} = $c->stash->{jobset_}->first;
 
     unless ($c->stash->{jobset}) {
         $self->status_not_found(
@@ -133,6 +136,7 @@ sub jobset_GET {
         , evals => getEvals($self, $c, scalar $c->stash->{jobset}->jobsetevals->search({},{
             columns => [
               'me.id',
+              'me.nrbuilds',
 	      'jobsetevalmembers.eval',
 	      'jobsetevalmembers.build',
               {
