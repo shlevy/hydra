@@ -137,6 +137,7 @@ sub jobset_GET {
             columns => [
               'me.id',
               'me.nrbuilds',
+              'me.nrsucceeded',
 	      'jobsetevalmembers.eval',
 	      'jobsetevalmembers.build',
               {
