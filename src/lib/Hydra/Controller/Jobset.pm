@@ -136,6 +136,8 @@ sub jobset_GET {
         , evals => getEvals($self, $c, scalar $c->stash->{jobset}->jobsetevals->search({},{
             columns => [
               'me.id',
+              'me.project',
+              'me.jobset',
               'me.nrbuilds',
               'me.nrsucceeded',
 	      'jobsetevalmembers.eval',
