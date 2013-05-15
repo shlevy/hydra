@@ -445,6 +445,7 @@ sub evals_GET {
         , 'jobsetevalmembers.build.logfile' => 'build.logfile'
         , 'jobsetevalmembers.build.finished' => 'build.finished'
         , 'jobsetevalmembers.build.buildStatus' => 'build.buildStatus'
+        , 'jobsetevalmembers.build.id' => 'build.id'
         }
       ],
       collapse => 1,
