@@ -431,7 +431,25 @@ sub evals_GET {
 
     my $resultsPerPage = 20;
 
-    my $evals = $c->stash->{jobset}->jobsetevals;
+    my $evals = $c->stash->{jobset}->jobsetevals->search({},{
+      columns => [
+        'me.id',
+        'me.project',
+        'me.jobset',
+        'me.nrbuilds',
+        'me.nrsucceeded',
+        'jobsetevalmembers.eval',
+        'jobsetevalmembers.build',
+        {
+          'jobsetevalmembers.build.job.name' => 'job.name'
+        , 'jobsetevalmembers.build.logfile' => 'build.logfile'
+        , 'jobsetevalmembers.build.finished' => 'build.finished'
+        , 'jobsetevalmembers.build.buildStatus' => 'build.buildStatus'
+        }
+      ],
+      collapse => 1,
+      join => { jobsetevalmembers => { build => [ 'job' ] } }
+    });
 
     $c->stash->{resultsPerPage} = $resultsPerPage;
     $c->stash->{page} = $page;
