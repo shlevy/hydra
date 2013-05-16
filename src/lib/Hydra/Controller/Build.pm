@@ -223,7 +223,7 @@ sub download : Chained('build') PathPart :Args(2) {
 # Redirect to a download with the given type.  Useful when you want to
 # link to some build product of the latest build (i.e. in conjunction
 # with the .../latest redirect).
-sub download_by_type : Chained('build') PathPart('download-by-type') :Args(3) {
+sub download_by_type : Chained('build') PathPart('download-by-type') {
     my ($self, $c, $type, $subtype, @path) = @_;
 
     notFound($c, "You need to specify a type and a subtype in the URI.")
