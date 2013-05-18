@@ -207,8 +207,8 @@ sub sendEmail {
 # undefined, making them annoying to handle.  So this utility function
 # always returns a request parameter as a list.
 sub paramToList {
-    my ($c, $name) = @_;
-    my $x = $c->request->params->{$name};
+    my ($params, $name) = @_;
+    my $x = $params->{$name};
     return () unless defined $x;
     return @$x if ref($x) eq 'ARRAY';
     return ($x);

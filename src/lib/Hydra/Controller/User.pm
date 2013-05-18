@@ -184,8 +184,17 @@ sub deleteUser {
 }
 
 
-sub edit :Chained('user') Args(0) {
+sub edit :Chained('user') :Args(0) :ActionClass('REST::ForBrowsers') { }
+
+sub edit_POST {
     my ($self, $c) = @_;
+
+    my $data;
+    if (defined $c->request->data) {
+        $data = $c->request->data;
+    } else {
+        $data = $c->request->params;
+    }
 
     my $user = $c->stash->{user};
 
@@ -199,12 +208,12 @@ sub edit :Chained('user') Args(0) {
         return;
     }
 
-    if (($c->request->params->{submit} // "") eq "delete") {
+    if (($data->{submit} // "") eq "delete") {
         deleteUser($self, $c, $user);
         backToReferer($c);
     }
 
-    if (($c->request->params->{submit} // "") eq "reset-password") {
+    if (($data->{submit} // "") eq "reset-password") {
         $c->stash->{json} = {};
         error($c, "No email address is set for this user.")
             unless $user->emailaddress;
@@ -221,7 +230,7 @@ sub edit :Chained('user') Args(0) {
         return;
     }
 
-    my $fullName = trim $c->req->params->{fullname};
+    my $fullName = trim $data->{fullname};
 
     txn_do($c->model('DB')->schema, sub {
 
@@ -229,27 +238,31 @@ sub edit :Chained('user') Args(0) {
 
         $user->update(
             { fullname => $fullName
-            , emailonerror => $c->request->params->{"emailonerror"} ? 1 : 0
+            , emailonerror => $data->{"emailonerror"} ? 1 : 0
             });
 
-        my $password = $c->req->params->{password} // "";
+        my $password = $data->{password} // "";
         if ($password ne "") {
             error($c, "You must specify a password of at least 6 characters.")
                 unless isValidPassword($password);
             error($c, "The passwords you specified did not match.")
-                if $password ne trim $c->req->params->{password2};
+                if $password ne trim $data->{password2};
             setPassword($user, $password);
         }
 
         if (isAdmin($c)) {
             $user->userroles->delete_all;
             $user->userroles->create({ role => $_})
-                foreach paramToList($c, "roles");
+                foreach paramToList($data, "roles");
         }
 
     });
 
-    backToReferer($c);
+    if ($c->request->looks_like_browser) {
+        backToReferer($c);
+    } else {
+        $self->status_no_content($c);
+    }
 }
 
 
