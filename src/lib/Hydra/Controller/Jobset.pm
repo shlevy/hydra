@@ -446,6 +446,9 @@ sub evals_GET {
         , 'jobsetevalmembers.build.finished' => 'build.finished'
         , 'jobsetevalmembers.build.buildStatus' => 'build.buildStatus'
         , 'jobsetevalmembers.build.id' => 'build.id'
+        , 'jobsetevalmembers.build.timestamp' => 'build.timestamp'
+        , 'jobsetevalmembers.build.starttime' => 'build.starttime'
+        , 'jobsetevalmembers.build.stoptime' => 'build.stoptime'
         }
       ],
       collapse => 1,
