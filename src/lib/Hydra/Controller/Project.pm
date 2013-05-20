@@ -89,14 +89,19 @@ sub project_GET {
         entity => {
           project => $c->stash->{project},
           #!!! Fixme: Want to JOIN this with the projects query
-          jobsets => [$c->stash->{project}->jobsets->search(isProjectOwner($c, $c->stash->{project}) ? {} : { hidden => 0 },
-            { order_by => "name"
+          jobsets => [$c->stash->{project}->jobsets->search(isProjectOwner($c, $c->stash->{project}) ? {} : { 'me.hidden' => 0 },
+            { order_by => "me.name"
+            , collapse => 1
             , columns => [ {
                 nrscheduled => "(select count(*) from Builds as a where a.finished = 0 and me.project = a.project and me.name = a.jobset and a.isCurrent = 1)"
               , nrfailed => "(select count(*) from Builds as a where a.finished = 1 and me.project = a.project and me.name = a.jobset and buildstatus <> 0 and a.isCurrent = 1)"
               , nrsucceeded => "(select count(*) from Builds as a where a.finished = 1 and me.project = a.project and me.name = a.jobset and buildstatus = 0 and a.isCurrent = 1)"
               , nrtotal => "(select count(*) from Builds as a where me.project = a.project and me.name = a.jobset and a.isCurrent = 1)"
-              }, "enabled", "hidden", "name", "description", "lastcheckedtime" ]
+	      , 'jobsetinputs.jobsetinputalts.altnr' => 'jobsetinputalts.altnr'
+	      , 'jobsetinputs.jobsetinputalts.value' => 'jobsetinputalts.value'
+	      , 'jobsetinputs.name' => 'jobsetinputs.name'
+              }, "me.enabled", "me.hidden", "me.name", "me.description", "me.lastcheckedtime", "me.project" ]
+            , join => { 'jobsetinputs' => 'jobsetinputalts' }
             })],
         }
     );
