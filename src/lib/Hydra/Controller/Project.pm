@@ -97,10 +97,9 @@ sub project_GET {
               , nrfailed => "(select count(*) from Builds as a where a.finished = 1 and me.project = a.project and me.name = a.jobset and buildstatus <> 0 and a.isCurrent = 1)"
               , nrsucceeded => "(select count(*) from Builds as a where a.finished = 1 and me.project = a.project and me.name = a.jobset and buildstatus = 0 and a.isCurrent = 1)"
               , nrtotal => "(select count(*) from Builds as a where me.project = a.project and me.name = a.jobset and a.isCurrent = 1)"
-	      , 'jobsetinputs.jobsetinputalts.altnr' => 'jobsetinputalts.altnr'
-	      , 'jobsetinputs.jobsetinputalts.value' => 'jobsetinputalts.value'
-	      , 'jobsetinputs.name' => 'jobsetinputs.name'
-              }, "me.enabled", "me.hidden", "me.name", "me.description", "me.lastcheckedtime", "me.project" ]
+              , 'jobsetinputs.jobsetinputalts.altnr' => 'jobsetinputalts.altnr'
+              , 'jobsetinputs.jobsetinputalts.value' => 'jobsetinputalts.value'
+              }, "me.enabled", "me.hidden", "me.name", "me.description", "me.lastcheckedtime", "me.project", "jobsetinputs.name" ]
             , join => { 'jobsetinputs' => 'jobsetinputalts' }
             })],
         }

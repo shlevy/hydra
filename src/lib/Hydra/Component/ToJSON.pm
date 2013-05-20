@@ -18,15 +18,16 @@ sub TO_JSON {
         if ($accessor eq "single" and exists $self->{_relationship_data}{$relname}) {
             $json->{$relname} = $self->$relname->TO_JSON;
         } else {
-            my $cond = $relinfo->{cond};
-            if (ref $cond eq 'HASH') {
-                foreach my $k (keys %{$cond}) {
-                    my $v = $cond->{$k};
-                    $v =~ s/^self\.//;
-                    next RELLOOP unless $self->has_column_loaded($v);
-                }
-            } #!!! TODO: Handle ARRAY conditions
-
+            unless (defined $self->{related_resultsets}{$relname}) {
+                my $cond = $relinfo->{cond};
+                if (ref $cond eq 'HASH') {
+                    foreach my $k (keys %{$cond}) {
+                        my $v = $cond->{$k};
+                        $v =~ s/^self\.//;
+                        next RELLOOP unless $self->has_column_loaded($v);
+                    }
+                } #!!! TODO: Handle ARRAY conditions
+            }
             if (defined $self->related_resultset($relname)->get_cache) {
                 if ($accessor eq "multi") {
                     $json->{$relname} = [ map { $_->TO_JSON } $self->$relname ];
