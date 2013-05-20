@@ -263,8 +263,7 @@ sub checkJobset {
 sub checkSomeJobset {
     # If any jobset has been triggered by a push, check it.
     my ($jobset) = $db->resultset('Jobsets')->search(
-        { 'project.enabled' => 1, 'me.enabled' => 1, 'triggertime' => { '!=', undef },
-        , -or => [ 'lastcheckedtime' => undef, 'lastcheckedtime' => { '<', time() - $minCheckInterval } ] },
+        { 'project.enabled' => 1, 'me.enabled' => 1, 'triggertime' => { '!=', undef }, },
         { join => 'project', order_by => [ 'triggertime' ], rows => 1 });
 
     # Otherwise, check the jobset that hasn't been checked for the
