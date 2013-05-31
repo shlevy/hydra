@@ -78,7 +78,7 @@ sub checkBuilds {
     my %maxConcurrent;
 
     foreach my $machineName (keys %{$machines}) {
-        foreach my $system (${$machines}{$machineName}{'systemTypes'}) {
+        foreach my $system (@{${$machines}{$machineName}{'systemTypes'}}) {
             $maxConcurrent{$system} = (${$machines}{$machineName}{'maxJobs'} or 0) + ($maxConcurrent{$system} or 0)
         }
     }
